@@ -1,4 +1,5 @@
 var spawn = require('child_process').spawn;
+var sleep = require('sleep');
 
 // The number of nodes to spawn
 var nodes = 0;
@@ -19,18 +20,22 @@ var main_node = null;
 if(nodes >= 1)
 {
     main_node = spawn('node', ["Chord.js", "main_node"]);
+    /*
     main_node.stdout.on('data', function(data) {
         console.log(data.toString());
     });
     main_node.stderr.on('data', function(data) {
         console.log(data.toString());
     });
+    */
 }
 
 var default_nodes = [];
 for (var i = 0; i < nodes - 1; i++)
 {
     var node = spawn('node', ['Chord.js', 'node']);
+    console.info((i + 2) + " nodes spawned");
+    sleep.sleep(2);
     default_nodes.push(node);
 }
 

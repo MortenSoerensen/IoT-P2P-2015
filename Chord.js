@@ -1,5 +1,8 @@
 // Disclaimer: Everything needs to run on the same ip/machine
 
+// TODO: URL-rewrite json strings (they could contain illegal characters)
+// NOTE: We may need to switch to sync-http requests
+
 var http = require('http');
 var url  = require('url');
 var crypto = require('crypto');
@@ -40,6 +43,10 @@ else // Enough arguments
 // Function to hash 'str' with the best feasible hashing algorithm
 function hash_string(str)
 {
+    // NOTE: Comment the below line in for clearity
+    // TODO: Uncomment when we handle intervals as we should
+    return str;
+
     // Get a list of supported hash functions
     var hash_functions = crypto.getHashes();
     //console.info(hash_functions);
@@ -78,16 +85,63 @@ function hash_string(str)
 // console.info(parseInt(hash_alfa, 16).toString(16));
 
 // Information object about this chord node
-var chord_info = {}
+var chord_node = {}
+
+function find_successor(info, callback)
+{
+    var id = info.id;
+    // TODO: Do the right interval thing
+    // This has issues if an entity is larger than the first added
+    if(chord_node.info == chord_node.successor)
+    {
+        chord_node.successor = info;
+        return chord_node.info;
+    }
+    else if(chord_node.info.id <= id && id <= chord_node.successor.id)
+    {
+        var old_successor = chord_node.successor;
+        chord_node.successor = info;
+        return old_successor;
+    }
+    else
+    {
+        return {
+            error: 'Try next door',
+            next_door: chord_node.successor
+        };
+        /*
+        // Setup the HTTP request
+        var options = {
+            host: chord_node.successor.ip,
+            port: chord_node.successor.port,
+            path: '/find_successor?info=' + JSON.stringify(info)
+        };
+        // ... and fire!
+        http.get(options, function(res)
+        {
+            res.on("data", function(chunk)
+            {
+                console.info(chunk);
+                callback(JSON.parse(chunk));
+            });
+        }).on('error', function(e)
+        {
+            console.error("Error while calling find_successor: " + e.message);
+            console.error("Terminating");
+            process.exit(1);
+        });
+        */
+    }
+}
 
 // Function to join the Chord ring, via the known main node
-function chord_join(join_id)
+function chord_join(join_port)
 {
     // Setup the HTTP request
     var options = {
         host: 'localhost',
-        port: main_node_port,
-        path: '/join?id=' + join_id
+        port: join_port,
+        path: '/join?info=' + JSON.stringify(chord_node.info)
     };
     // ... and fire!
     http.get(options, function(res)
@@ -96,9 +150,22 @@ function chord_join(join_id)
         console.log("Got response code: " + res.statusCode);
         res.on("data", function(chunk)
         {
-            // TODO: 'chuck' will contain information about setting up the chord_info
-            // TODO: Have chuck be json
             console.log("Got response: " + chunk);
+            var object = JSON.parse(chunk);
+            if(object.id != null)
+            {
+                chord_node.successor = object;
+            }
+            else
+            {
+                if(object.next_door.port == 8080)
+                {
+                    // The interval issue, infinte recursion here
+                    console.error("IMPLEMENTATION BUG!");
+                    process.exit(1);
+                }
+                chord_join(object.next_door.port);
+            }
         });
     }).on('error', function(e)
     {
@@ -124,15 +191,27 @@ var server = http.createServer(function(req, res)
     {
         case "/id":
             res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write(chord_info.id);
+            res.write(JSON.stringify(chord_node.info));
+            res.end();
+            break;
+
+        case "/successor":
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.write(JSON.stringify(chord_node.successor));
+            res.end();
+            break;
+
+        case "/find_successor":
+            var info = JSON.parse(query.info);
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.write(JSON.stringify(find_successor(info)));
             res.end();
             break;
 
         case "/join":
-            var id = query.id;
-
+            var info = JSON.parse(query.info);
             res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write("Succes!");
+            res.write(JSON.stringify(find_successor(info)));
             res.end();
             break;
     }
@@ -150,12 +229,20 @@ server.listen(port, function()
     var node_id = hash_string(server_address_string);
     console.info("Node has id: " + node_id);
     // Assign the node id
-    chord_info.id = node_id;
+    chord_node.info = {};
+    chord_node.info.id = node_id;
+    chord_node.info.ip = address.address;
+    chord_node.info.port = address.port;
 
-    // If not the main node, join the ring here
-    if(address.port != main_node_port)
+    // If we're the main node, setup the successor as ourself
+    if(address.port == main_node_port)
+    {
+        chord_node.successor = chord_node.info;
+        //console.info(chord_node.successor)
+    }
+    else // If not the main node, join the ring here
     {
         console.info("Trying to join Chord ring:");
-        chord_join(node_id);
+        chord_join(main_node_port);
     }
 });
