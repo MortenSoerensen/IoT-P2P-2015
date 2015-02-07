@@ -2,6 +2,14 @@
 
 // TODO: URL-rewrite json strings (they could contain illegal characters)
 // NOTE: We may need to switch to sync-http requests
+//
+// MISSING:
+// * Det skal være muligt pænt at forlade ringen. 
+// * I skal implementere find_successor funktionen, således at man kan finde den ansvarlige peer for et givent id. 
+//      SEMI-DONE
+// * Den enkelte peer skal overfor en webbrowser præsentere en simpel side;
+// ** Hvor man kan foretage en søgning efter id (resultatet et link til den ansvarlige peer),
+// * Bonus: Gør jeres ring robust over churn v.hj.a. successorlister.
 
 var http = require('http');
 var url  = require('url');
@@ -21,12 +29,12 @@ if(process.argv.length <= 2)
 }
 else // Enough arguments
 {
-    if(process.argv[2] == "main_node")
+    if(process.argv[2] === "main_node")
     {
         port = main_node_port;
         console.info("Main node requested");
     }
-    else if(process.argv[2] == "node")
+    else if(process.argv[2] === "node")
     {
         // When port is set to zero, a random port will be allocated
         // *A port value of zero will assign a random port.*
@@ -44,8 +52,7 @@ else // Enough arguments
 function hash_string(str)
 {
     // NOTE: Comment the below line in for clearity
-    // TODO: Uncomment when we handle intervals as we should
-    //return str;
+    // return str;
 
     // Get a list of supported hash functions
     var hash_functions = crypto.getHashes();
@@ -68,7 +75,7 @@ function hash_string(str)
         }
     }
     // No alternative present
-    if(hash_function == null)
+    if(hash_function === null)
     {
         console.error("No adequate hash function present, terminating");
         process.exit(1);
@@ -89,6 +96,7 @@ var chord_node = {}
 
 function find_successor(info)
 {
+    // TODO: Clean up the below
     function try_next_door()
     {
         return {
@@ -103,83 +111,22 @@ function find_successor(info)
         var key2 = chord_node.successor.id;
         var id = info.id;
 
-    	if (key1 < key2) 
+    	if (
+        // Keys are in order, check that we're inbetween
+           ((key1 < key2) && (key1 < id && id <= key2)) ||
+        // Keys are not in order, if we're larger than both, we must be less than max
+           ((key1 > key2) && ((id > key1 && id >= key2))) ||
+        // Keys are not in order, if we're smaller than both, we must be larger than min
+           ((key1 > key2) && ((id < key1 && id < key2))) ||
+        // We equal key2, so we're in
+           ((id === key2)))
         {
-			if (id > key1 && id <= key2)
-            {
-				return true;
-			}
-		}
-        else
-        {
-			if (key1 > key2) 
-            {
-				if ((id > key1 && id > key2) || id == key2)
-                {
-					return true;
-				}
-                else
-                {
-					if (id < key1 && id < key2)
-                    {
-						return true;
-					}
-				}
-			}
-            else // key1 == key2
-            {
-				if (id == key2)
-                {
-					return true;
-				}
-			}
-		}
-
+            return true;
+        }
 		return false;
     }
 
-    function isBetween()
-    {
-        var key1 = chord_node.info.id;
-        var key2 = chord_node.successor.id;
-        var id = info.id;
-
-    	if (key1 < key2) 
-        {
-			if (id > key1 && id < key2)
-            {
-				return true;
-			}
-		}
-        else
-        {
-			if (key1 > key2) 
-            {
-				if (id > key1 && id > key2)
-                {
-					return true;
-				}
-                else
-                {
-					if (id < key1 && id < key2)
-                    {
-						return true;
-					}
-				}
-			}
-            else // key1 == key2
-            {
-				if (id == key2)
-                {
-					return true;
-				}
-			}
-		}
-
-		return false;
-    }
-
-    if(chord_node.info == chord_node.successor)
+    if(chord_node.info === chord_node.successor)
     {
         chord_node.successor = info;
         return chord_node.info;
@@ -224,6 +171,12 @@ function chord_join(join_port)
             }
             else
             {
+                if(object.next_door.port === 8080)
+                {
+                    console.error("Error: Traversed the Chord ring without inserting!");
+                    console.error("Terminating");
+                    process.exit(1);
+                }
                 chord_join(object.next_door.port);
             }
         });
@@ -249,28 +202,47 @@ var server = http.createServer(function(req, res)
 
     switch(path_name)
     {
+        // Browser html info page
+        case "/":
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.write("<html><head><title>Chord Node</title></head><body>");
+            res.write("ID: " + chord_node.info.id + "</br>");
+            res.write("IP: " + chord_node.info.ip + "</br>");
+            res.write("PORT: " + chord_node.info.port + "</br>");
+            res.write("</br>");
+            res.write("successor: <a href=\"http://");
+            if(chord_node.successor.ip = "0.0.0.0")
+            {
+                res.write("localhost:" + chord_node.successor.port);
+            }
+            else
+            {
+                res.write(chord_node.successor.ip + ":" + chord_node.successor.port);
+            }
+            res.write("\">visit successor</a>");
+            // TODO: Predecessor link
+            res.write("</body></html>");
+            res.end();
+            break;
+
+        // JSON id query
         case "/id":
-            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.writeHead(200, {'Content-Type': 'application/json'});
             res.write(JSON.stringify(chord_node.info));
             res.end();
             break;
 
+        // JSON successor query
         case "/successor":
-            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.writeHead(200, {'Content-Type': 'application/json'});
             res.write(JSON.stringify(chord_node.successor));
             res.end();
             break;
 
-        case "/find_successor":
-            var info = JSON.parse(query.info);
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write(JSON.stringify(find_successor(info)));
-            res.end();
-            break;
-
+        // JSON join (find_successor) query
         case "/join":
             var info = JSON.parse(query.info);
-            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.writeHead(200, {'Content-Type': 'application/json'});
             res.write(JSON.stringify(find_successor(info)));
             res.end();
             break;
@@ -295,7 +267,7 @@ server.listen(port, function()
     chord_node.info.port = address.port;
 
     // If we're the main node, setup the successor as ourself
-    if(address.port == main_node_port)
+    if(address.port === main_node_port)
     {
         chord_node.successor = chord_node.info;
         //console.info(chord_node.successor)

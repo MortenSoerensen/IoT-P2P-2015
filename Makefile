@@ -1,12 +1,15 @@
-.PHONY: all clean run render
+.PHONY: all clean run spawn render
 
-all: run
+all: spawn
 
 clean:
 	rm -rf output
 
 run:
 	node Chord.js main_node
+
+spawn:
+	node ChordSpawner.js 50
 
 render:
 	mkdir -p output

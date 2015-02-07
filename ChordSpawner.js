@@ -1,5 +1,4 @@
 var spawn = require('child_process').spawn;
-var sleep = require('sleep');
 var readline = require('readline');
 
 // The number of nodes to spawn
@@ -20,18 +19,15 @@ else // Enough arguments
 var main_node = null;
 if(nodes >= 1)
 {
+    // Spawn the main node
     main_node = spawn('node', ["Chord.js", "main_node"]);
-    /*
-    main_node.stdout.on('data', function(data) {
-        console.log(data.toString());
-    });
+    // Print out any errors detected
     main_node.stderr.on('data', function(data) {
         console.log(data.toString());
     });
-    */
 }
 
-var default_nodes = [];
+//var default_nodes = [];
 
 var start = function recurse(i)
 {
@@ -43,7 +39,7 @@ var start = function recurse(i)
     }
     // Spawn a node
     var node = spawn('node', ['Chord.js', 'node']);
-    default_nodes.push(node);
+    //default_nodes.push(node);
     console.info((i + 2) + " nodes spawned");
     // Detect the joined message, before spawning another node
     readline.createInterface({
@@ -54,6 +50,10 @@ var start = function recurse(i)
         {
             recurse(i+1);
         }
+    });
+    // Print out any errors detected
+    node.stderr.on('data', function(data) {
+        console.error(data.toString());
     });
 }
 // Start spawning nodes
