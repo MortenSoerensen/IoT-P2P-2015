@@ -45,7 +45,7 @@ function hash_string(str)
 {
     // NOTE: Comment the below line in for clearity
     // TODO: Uncomment when we handle intervals as we should
-    return str;
+    //return str;
 
     // Get a list of supported hash functions
     var hash_functions = crypto.getHashes();
@@ -87,50 +87,116 @@ function hash_string(str)
 // Information object about this chord node
 var chord_node = {}
 
-function find_successor(info, callback)
+function find_successor(info)
 {
-    var id = info.id;
-    // TODO: Do the right interval thing
-    // This has issues if an entity is larger than the first added
-    if(chord_node.info == chord_node.successor)
-    {
-        chord_node.successor = info;
-        return chord_node.info;
-    }
-    else if(chord_node.info.id <= id && id <= chord_node.successor.id)
-    {
-        var old_successor = chord_node.successor;
-        chord_node.successor = info;
-        return old_successor;
-    }
-    else
+    function try_next_door()
     {
         return {
             error: 'Try next door',
             next_door: chord_node.successor
         };
-        /*
-        // Setup the HTTP request
-        var options = {
-            host: chord_node.successor.ip,
-            port: chord_node.successor.port,
-            path: '/find_successor?info=' + JSON.stringify(info)
-        };
-        // ... and fire!
-        http.get(options, function(res)
+    }
+
+    function isBetweenRightIncluded()
+    {
+        var key1 = chord_node.info.id;
+        var key2 = chord_node.successor.id;
+        var id = info.id;
+
+    	if (key1 < key2) 
         {
-            res.on("data", function(chunk)
+			if (id > key1 && id <= key2)
             {
-                console.info(chunk);
-                callback(JSON.parse(chunk));
-            });
-        }).on('error', function(e)
+				return true;
+			}
+		}
+        else
         {
-            console.error("Error while calling find_successor: " + e.message);
-            console.error("Terminating");
-            process.exit(1);
-        });
-        */
+			if (key1 > key2) 
+            {
+				if ((id > key1 && id > key2) || id == key2)
+                {
+					return true;
+				}
+                else
+                {
+					if (id < key1 && id < key2)
+                    {
+						return true;
+					}
+				}
+			}
+            else // key1 == key2
+            {
+				if (id == key2)
+                {
+					return true;
+				}
+			}
+		}
+
+		return false;
+    }
+
+    function isBetween()
+    {
+        var key1 = chord_node.info.id;
+        var key2 = chord_node.successor.id;
+        var id = info.id;
+
+    	if (key1 < key2) 
+        {
+			if (id > key1 && id < key2)
+            {
+				return true;
+			}
+		}
+        else
+        {
+			if (key1 > key2) 
+            {
+				if (id > key1 && id > key2)
+                {
+					return true;
+				}
+                else
+                {
+					if (id < key1 && id < key2)
+                    {
+						return true;
+					}
+				}
+			}
+            else // key1 == key2
+            {
+				if (id == key2)
+                {
+					return true;
+				}
+			}
+		}
+
+		return false;
+    }
+
+    if(chord_node.info == chord_node.successor)
+    {
+        chord_node.successor = info;
+        return chord_node.info;
+    }
+    else
+    {
+        var in_between = isBetweenRightIncluded();
+        if(in_between)
+        {
+            var old_successor = chord_node.successor;
+            chord_node.successor = info;
+            return old_successor;
+        }
+        else
+        {
+            return try_next_door();
+        }
     }
 }
 
@@ -146,7 +212,6 @@ function chord_join(join_port)
     // ... and fire!
     http.get(options, function(res)
     {
-        console.log("Successfully joined the Chord ring");
         console.log("Got response code: " + res.statusCode);
         res.on("data", function(chunk)
         {
@@ -154,16 +219,11 @@ function chord_join(join_port)
             var object = JSON.parse(chunk);
             if(object.id != null)
             {
+                console.log("Successfully joined the Chord ring");
                 chord_node.successor = object;
             }
             else
             {
-                if(object.next_door.port == 8080)
-                {
-                    // The interval issue, infinte recursion here
-                    console.error("IMPLEMENTATION BUG!");
-                    process.exit(1);
-                }
                 chord_join(object.next_door.port);
             }
         });

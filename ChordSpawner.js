@@ -1,5 +1,6 @@
 var spawn = require('child_process').spawn;
 var sleep = require('sleep');
+var readline = require('readline');
 
 // The number of nodes to spawn
 var nodes = 0;
@@ -31,33 +32,29 @@ if(nodes >= 1)
 }
 
 var default_nodes = [];
-for (var i = 0; i < nodes - 1; i++)
+
+var start = function recurse(i)
 {
+    // Check if all nodes have been created
+    if(i >= nodes - 1)
+    {
+        console.info("All nodes spawned!");
+        return;
+    }
+    // Spawn a node
     var node = spawn('node', ['Chord.js', 'node']);
-    console.info((i + 2) + " nodes spawned");
-    sleep.sleep(2);
     default_nodes.push(node);
-}
-
-var readline = require('readline');
-var rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-rl.on('line', function(line)
-{
-    if(line == "kill")
-    {
-        for (var i = 0; i < default_nodes.length; i++)
+    console.info((i + 2) + " nodes spawned");
+    // Detect the joined message, before spawning another node
+    readline.createInterface({
+      input     : node.stdout,
+      terminal  : false
+    }).on('line', function(line) {
+        if(line == "Successfully joined the Chord ring")
         {
-            default_nodes[i].kill();
+            recurse(i+1);
         }
-        main_node.kill();
-        process.exit(0);
-    }
-    else
-    {
-        console.warn("No such command: " + line);
-    }
-})
+    });
+}
+// Start spawning nodes
+start(0);
