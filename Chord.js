@@ -129,7 +129,12 @@ function find_successor(info)
     if(chord_node.info === chord_node.successor)
     {
         chord_node.successor = info;
-        return chord_node.info;
+        chord_node.predecessor = info;
+        // Tell the node, who it is in between
+        return {
+            "pre": chord_node.info,
+            "suc": chord_node.info
+        };
     }
     else
     {
@@ -138,7 +143,11 @@ function find_successor(info)
         {
             var old_successor = chord_node.successor;
             chord_node.successor = info;
-            return old_successor;
+            // Tell the node, who it is in between
+            return {
+                "pre": chord_node.info,
+                "suc": old_successor
+            };
         }
         else
         {
@@ -146,6 +155,68 @@ function find_successor(info)
         }
     }
 }
+/*
+function json_by_port(port, callback)
+{
+    // Setup the HTTP request
+    var options = {
+        host: 'localhost',
+        port: port,
+        path: '/id'
+    };
+    // ... and fire!
+    http.get(options, function(res)
+    {
+        console.log("Got response code: " + res.statusCode);
+        res.on("data", function(chunk)
+        {
+            console.log("Got response: " + chunk);
+            var object = JSON.parse(chunk);
+            if(object.id != null)
+            {
+                callback(object);
+            }
+            else
+            {
+                console.error("Error: Non JSON feedback!");
+                console.error("Terminating");
+                process.exit(1);
+            }
+        });
+    }).on('error', function(e)
+    {
+        console.error("Error while joining Chord ring: " + e.message);
+        console.error("Terminating");
+        process.exit(1);
+    });
+}
+*/
+
+function notify_new_predecessor(inform_port, us, callback)
+{
+    // Setup the HTTP request
+    var options = {
+        host: 'localhost',
+        port: inform_port,
+        path: '/notify?info=' + JSON.stringify(us)
+    };
+    // ... and fire!
+    http.get(options, function(res)
+    {
+        console.log("Got response code: " + res.statusCode);
+        res.on("data", function(chunk)
+        {
+            console.log("Got response: " + chunk);
+            callback();
+        });
+    }).on('error', function(e)
+    {
+        console.error("Error while joining Chord ring: " + e.message);
+        console.error("Terminating");
+        process.exit(1);
+    });
+}
+
 
 // Function to join the Chord ring, via the known main node
 function chord_join(join_port)
@@ -164,10 +235,14 @@ function chord_join(join_port)
         {
             console.log("Got response: " + chunk);
             var object = JSON.parse(chunk);
-            if(object.id != null)
+            if(object.suc != null)
             {
-                console.log("Successfully joined the Chord ring");
-                chord_node.successor = object;
+                chord_node.successor = object.suc;
+                chord_node.predecessor = object.pre;
+                notify_new_predecessor(chord_node.successor.port, chord_node.info, function()
+                {
+                    console.log("Successfully joined the Chord ring");
+                });
             }
             else
             {
@@ -211,7 +286,7 @@ var server = http.createServer(function(req, res)
             res.write("PORT: " + chord_node.info.port + "</br>");
             res.write("</br>");
             res.write("successor: <a href=\"http://");
-            if(chord_node.successor.ip = "0.0.0.0")
+            if(chord_node.successor.ip === "0.0.0.0")
             {
                 res.write("localhost:" + chord_node.successor.port);
             }
@@ -220,7 +295,20 @@ var server = http.createServer(function(req, res)
                 res.write(chord_node.successor.ip + ":" + chord_node.successor.port);
             }
             res.write("\">visit successor</a>");
-            // TODO: Predecessor link
+            res.write("predecessor: <a href=\"http://");
+            if(chord_node.predecessor === undefined)
+            {
+                console.error(chord_node.info.port + " says FUCK");
+            }
+            else if(chord_node.predecessor.ip === "0.0.0.0")
+            {
+                res.write("localhost:" + chord_node.predecessor.port);
+            }
+            else
+            {
+                res.write(chord_node.predecessor.ip + ":" + chord_node.predecessor.port);
+            }
+            res.write("\">visit predecessor</a>");
             res.write("</body></html>");
             res.end();
             break;
@@ -246,6 +334,17 @@ var server = http.createServer(function(req, res)
             res.write(JSON.stringify(find_successor(info)));
             res.end();
             break;
+
+        // JSON join (find_successor) query
+        case "/notify":
+            var info = JSON.parse(query.info);
+            chord_node.predecessor = info;
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.write("SUCCES!");
+            res.end();
+            console.warn("New predecessor");
+            break;
+
     }
 });
 // Start the server!
@@ -269,6 +368,7 @@ server.listen(port, function()
     // If we're the main node, setup the successor as ourself
     if(address.port === main_node_port)
     {
+        chord_node.predecessor = undefined;
         chord_node.successor = chord_node.info;
         //console.info(chord_node.successor)
     }
