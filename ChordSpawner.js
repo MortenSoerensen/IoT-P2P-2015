@@ -20,7 +20,7 @@ var main_node = null;
 if(nodes >= 1)
 {
     // Spawn the main node
-    main_node = spawn('node', ["output/Chord.js", "main_node"]);
+    main_node = spawn('node', ["output/Driver.js", "main_node"]);
     // Print out any errors detected
     main_node.stderr.on('data', function(data) {
         console.log(data.toString());
@@ -38,7 +38,7 @@ var start = function recurse(i)
         return;
     }
     // Spawn a node
-    var node = spawn('node', ['output/Chord.js', 'node']);
+    var node = spawn('node', ['output/Driver.js', 'node']);
     //default_nodes.push(node);
     console.info((i + 2) + " nodes spawned");
     // Detect the joined message, before spawning another node

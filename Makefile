@@ -6,14 +6,14 @@ output/DONT_DELETE:
 	mkdir -p output
 	echo "DONT_DELETE" > output/DONT_DELETE
 
-output/Chord.js: Chord.ts output/DONT_DELETE
-	tsc Chord.ts -out output/Chord.js
+output/Driver.js: Driver.ts output/DONT_DELETE
+	tsc Driver.ts -out output/Driver.js
 
 clean:
 	rm -rf output
 
-run: output/Chord.js
-	node output/Chord.js main_node
+run: output/Driver.js
+	node output/Driver.js main_node
 
 spawn: output/Chord.js
 	node ChordSpawner.js 50
