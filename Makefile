@@ -6,7 +6,9 @@ output/DONT_DELETE:
 	mkdir -p output
 	echo "DONT_DELETE" > output/DONT_DELETE
 
-output/Driver.js: Driver.ts output/DONT_DELETE
+TYPESCRIPT_SOURCES=$(wildcard *.ts)
+
+output/Driver.js: $(TYPESCRIPT_SOURCES) output/DONT_DELETE
 	tsc Driver.ts -out output/Driver.js
 
 clean:
