@@ -2,8 +2,11 @@
 
 all: spawn
 
-output/Chord.js: Chord.ts
+output/DONT_DELETE:
 	mkdir -p output
+	echo "DONT_DELETE" > output/DONT_DELETE
+
+output/Chord.js: Chord.ts output/DONT_DELETE
 	tsc Chord.ts -out output/Chord.js
 
 clean:
