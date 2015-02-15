@@ -1,10 +1,16 @@
 // Disclaimer: Everything needs to run on the same ip/machine
 //              --> NOTE: Easily fixable
-
+//
 // TODO: URL-rewrite json strings (they could contain illegal characters)
+// TODO: ID padding / rejection
 //
 // MISSING:
 // * Bonus: Gør jeres ring robust over churn v.hj.a. successorlister.
+
+// Declare the nodejs require function
+declare function require(name : string);
+
+declare var process : any;
 
 var http = require('http');
 var url  = require('url');
@@ -20,7 +26,7 @@ if(process.argv.length <= 2)
 {
     console.error("Not enough arguments provided!");
     console.info("Usage: node Chord.js (main_node | node)");
-    return;
+    process.exit(1);
 }
 else // Enough arguments
 {
@@ -39,7 +45,7 @@ else // Enough arguments
     else
     {
         console.error("Invalid node configuration requested");
-        return;
+        process.exit(1);
     }
 }
 
@@ -87,7 +93,7 @@ function hash_string(str)
 // console.info(parseInt(hash_alfa, 16).toString(16));
 
 // Information object about this chord node
-var chord_node = {}
+var chord_node : any = {};
 
 function find_successor(id, callback)
 {
@@ -163,7 +169,7 @@ function find_successor(id, callback)
     }
 }
 
-function find_join_successor(info)
+function find_join_successor(info) : any
 {
     // TODO: Clean up the below
     function try_next_door()
@@ -428,9 +434,10 @@ var server = http.createServer(function(req, res)
             res.write(JSON.stringify(chord_node));
             res.end();
             break;
-*/
-/* // XXX: Two below; Required for the render, but the render should use the above
- * // XXX: Also it should be switchable (aka. enable render-mode)
+            */
+           /*
+ // XXX: Two below; Required for the render, but the render should use the above
+  // XXX: Also it should be switchable (aka. enable render-mode)
         // JSON id query
         case "/id":
             res.writeHead(200, {'Content-Type': 'application/json'});
@@ -444,7 +451,8 @@ var server = http.createServer(function(req, res)
             res.write(JSON.stringify(chord_node.successor));
             res.end();
             break;
-*/
+            */
+
         // JSON join (find_join_successor) query
         case "/join":
             // TODO: Use find_successor, ask successor for predecessor and update them

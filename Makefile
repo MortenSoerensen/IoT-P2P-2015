@@ -2,13 +2,17 @@
 
 all: spawn
 
+output/Chord.js: Chord.ts
+	mkdir -p output
+	tsc Chord.ts -out output/Chord.js
+
 clean:
 	rm -rf output
 
-run:
-	node Chord.js main_node
+run: output/Chord.js
+	node output/Chord.js main_node
 
-spawn:
+spawn: output/Chord.js
 	node ChordSpawner.js 50
 
 render:
