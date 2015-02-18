@@ -1,8 +1,6 @@
 // Disclaimer: Everything needs to run on the same ip/machine
 //              --> NOTE: Easily fixable
 //
-// TODO: URL-rewrite json strings (they could contain illegal characters)
-//
 // MISSING:
 // * Bonus: Gør jeres ring robust over churn v.hj.a. successorlister.
 
@@ -128,7 +126,7 @@ class Chord implements IChord
 
             // JSON notify query (i.e. update your successor or predecessor)
             case "/notify":
-                var info : TransferNodePair = JSON.parse(query.info);
+                var info : TransferNodePair = JSON.parse(decodeURIComponent(query.info));
                 // Update pre
                 if(info.predecessor !== undefined)
                 {
@@ -265,7 +263,7 @@ class Chord implements IChord
         var options = {
             host: 'localhost',
             port: inform_port,
-            path: '/notify?info=' + JSON.stringify(payload)
+            path: '/notify?info=' + encodeURIComponent(JSON.stringify(payload))
         };
         // ... and fire!
         http.get(options, function(res)
