@@ -18,18 +18,22 @@ predecessor: <a href="http://%%PRED-IP%%:%%PRED-PORT%%">visit predecessor</a>
 <script>
     function find_succ()
     {
-        var succ = document.getElementById("succ");
-        alert(succ.value);
+        var succ = document.getElementById("succ").value;
+        var id = "%%ID%%";
+
+        var succ_pad = Array(id.length + 1 - succ.length).join("0") + succ;
+        //alert(succ);
+        //alert(succ_pad);
         var xmlhttp = new XMLHttpRequest();
-        var url = "find_successor?id=" + succ.value;
+        var url = "find_successor?id=" + succ_pad;
         xmlhttp.onreadystatechange = function()
         {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
             {
-                alert(xmlhttp.responseText);
+                //alert(xmlhttp.responseText);
                 var json = JSON.parse(xmlhttp.responseText);
-                var goto = "http://" + json.suc.ip + ":" + json.suc.port;
-                alert(goto);
+                var goto = "http://" + json.ip + ":" + json.port;
+                //alert(goto);
                 window.location.href = goto;
             }
         }

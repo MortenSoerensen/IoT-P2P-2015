@@ -2,30 +2,35 @@
 //              --> NOTE: Easily fixable
 //
 // TODO: URL-rewrite json strings (they could contain illegal characters)
-// TODO: ID padding / rejection
 //
 // MISSING:
 // * Bonus: Gør jeres ring robust over churn v.hj.a. successorlister.
+
+/// <reference path='IChord.ts'/>
 
 // Declare the nodejs require function
 declare function require(name : string);
 
 var http = require('http');
 var url  = require('url');
-var fs   = require('fs')
-var crypto = require('crypto');
 
-class node
+class Chord implements IChord
 {
     // Information object about this chord node
-    private chord_node : any;
+    private info : NodeInfo;
+    private successor : NodeInfo;
+    private predecessor : NodeInfo;
+
+    // HTML template
     private template_string : string;
 
     constructor()
     {
         var _this = this;
-        _this.chord_node = {};
-
+        // Setup the node info struct
+        _this.info = new NodeInfo();
+        // Pre-load the html template
+        var fs = require('fs')
         fs.readFile('template.html', 'utf8', function (err, data)
         {
             if (err)
@@ -38,15 +43,7 @@ class node
         });
     }
 
-    private ip_to_string(ip : string) : string
-    {
-        if(ip === "0.0.0.0")
-            return "localhost";
-        else
-            return ip;
-    }
-
-    run(host_port : number) : void
+    public run(host_port : number) : void
     {
         var _this = this;
         var server = http.createServer(function(req, res)
@@ -66,23 +63,15 @@ class node
                 // Browser html info page
             case "/":
                 var data = _this.template_string;
-                data = data.replace("%%ID%%", _this.chord_node.info.id);
-                data = data.replace("%%IP%%", _this.chord_node.info.ip);
-                data = data.replace("%%PORT%%", _this.chord_node.info.port);
+                data = data.replace(/%%ID%%/g, _this.info.id);
+                data = data.replace(/%%IP%%/g, _this.info.ip);
+                data = data.replace(/%%PORT%%/g, _this.info.port.toString());
 
-                data = data.replace("%%SUCC-IP%%", _this.chord_node.successor.ip);
-                data = data.replace("%%SUCC-PORT%%", _this.chord_node.successor.port);
+                data = data.replace(/%%SUCC-IP%%/g, _this.successor.ip);
+                data = data.replace(/%%SUCC-PORT%%/g, _this.successor.port.toString());
 
-                if(_this.chord_node.predecessor !== undefined)
-                {
-                    data = data.replace("%%PRED-IP%%", _this.chord_node.predecessor.ip);
-                    data = data.replace("%%PRED-PORT%%", _this.chord_node.predecessor.port);
-                }
-                else // is undefined
-                {
-                    data = data.replace("%%PRED-IP%%", _this.chord_node.info.ip);
-                    data = data.replace("%%PRED-PORT%%", _this.chord_node.info.port);
-                }
+                data = data.replace(/%%PRED-IP%%/g, _this.predecessor.ip);
+                data = data.replace(/%%PRED-PORT%%/g, _this.predecessor.port.toString());
 
                 res.writeHead(200, {'Content-Type': 'text/html'});
                 res.write(data);
@@ -92,16 +81,18 @@ class node
             case "/leave":
                 res.writeHead(200, {'Content-Type': 'text/plain'});
                 // Inform our successor of it's now predecessor
-                var payload = {
-                    "pre": _this.chord_node.predecessor
+                var payload : TransferNodePair = {
+                    predecessor: _this.predecessor,
+                    successor: undefined
                 };
-                _this.notify_new_neighbour(_this.chord_node.successor.port, payload, function()
+                _this.notify_new_neighbour(_this.successor.port, payload, function()
                 {
                     // Inform our predecessor of it's now successor
-                    var payload = {
-                        "suc": _this.chord_node.successor
+                    var payload : TransferNodePair = {
+                        predecessor: undefined,
+                        successor: _this.successor
                     };
-                    _this.notify_new_neighbour(_this.chord_node.predecessor.port, payload, function()
+                    _this.notify_new_neighbour(_this.predecessor.port, payload, function()
                     {
                         // We're out of the loop!
                         res.write("Left the Chord Ring successfully!");
@@ -117,76 +108,50 @@ class node
             case "/find_successor":
                 var id = query.id;
                 res.writeHead(200, {'Content-Type': 'application/json'});
-                _this.find_successor(id, function(ma)
+                _this.find_successor_server(id, function(suc : NodeInfo)
                 {
-                    console.info("ma------");
-                    console.info(ma);
-                    console.info("------ma");
-                    res.write(JSON.stringify(ma));
+                    console.warn(suc);
+                    res.write(JSON.stringify(suc));
                     res.end();
                 });
                 break;
-                /*
-                      // JSON Send the entire this.chord_node
-                      case "/all":
-                          res.writeHead(200, {'Content-Type': 'application/json'});
-                          res.write(JSON.stringify(this.chord_node));
-                          res.end();
-                          break;
 
-                       // XXX: Two below; Required for the render, but the render should use the above
-                       // XXX: Also it should be switchable (aka. enable render-mode)
-                       // JSON id query
-                       case "/id":
-                           res.writeHead(200, {'Content-Type': 'application/json'});
-                           res.write(JSON.stringify(this.chord_node.info));
-                           res.end();
-                           break;
+            case "/find_neighbours":
+                var id = query.id;
+                res.writeHead(200, {'Content-Type': 'application/json'});
+                _this.find_neighbours_server(id, function(pair : TransferNodePair)
+                {
+                    res.write(JSON.stringify(pair));
+                    res.end();
+                });
+                break;
 
-                       // JSON successor query
-                       case "/successor":
-                           res.writeHead(200, {'Content-Type': 'application/json'});
-                           res.write(JSON.stringify(this.chord_node.successor));
-                           res.end();
-                           break;
-                    */
-                    /*
-                        // JSON join (find_join_successor) query
-                       case "/join":
-                           // TODO: Use find_successor, ask successor for predecessor and update them
-                           // NOTE: The above will remove the need for find_join_successor
-                           var info = JSON.parse(query.info);
-                           res.writeHead(200, {'Content-Type': 'application/json'});
-                           res.write(JSON.stringify(_this.find_join_successor(info)));
-                           res.end();
-                           break;
-                    */
-                        // JSON notify query (i.e. update your successor or predecessor)
-                       case "/notify":
-                           var info = JSON.parse(query.info);
-                           // Update pre
-                           if(info.pre !== undefined)
-                           {
-                               console.warn("New predecessor");
-                               _this.chord_node.predecessor = info.pre;
-                           }
-                           // Update suc
-                           if(info.suc !== undefined)
-                           {
-                               console.warn("New successor");
-                               _this.chord_node.successor = info.suc;
-                           }
-                           // Went well
-                           res.writeHead(200, {'Content-Type': 'text/plain'});
-                           res.write("SUCCES!");
-                           res.end();
-                           break;
+            // JSON notify query (i.e. update your successor or predecessor)
+            case "/notify":
+                var info : TransferNodePair = JSON.parse(query.info);
+                // Update pre
+                if(info.predecessor !== undefined)
+                {
+                    console.warn("New predecessor");
+                    _this.predecessor = info.predecessor;
+                }
+                // Update suc
+                if(info.successor !== undefined)
+                {
+                    console.warn("New successor");
+                    _this.successor = info.successor;
+                }
+                // Went well
+                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.write("SUCCES!");
+                res.end();
+                break;
 
-                       default:
-                           res.writeHead(404, {'Content-Type': 'text/plain'});
-                           res.write("No such page! - " + path_name);
-                           res.end();
-                           break;
+            default:
+                res.writeHead(404, {'Content-Type': 'text/plain'});
+                res.write("No such page! - " + path_name);
+                res.end();
+                break;
             }
         });
         // Start the server!
@@ -202,18 +167,16 @@ class node
             var node_id = hash_string(server_address_string);
             console.info("Node has id: " + node_id);
             // Assign the node id
-            _this.chord_node.info = {};
-            _this.chord_node.info.id = node_id;
-            _this.chord_node.info.ip = _this.ip_to_string(address.address);
-            _this.chord_node.info.port = address.port;
+            _this.info.id = node_id;
+            _this.info.ip = ip_to_string(address.address);
+            _this.info.port = address.port;
 
             // If we're the main node, setup the successor as ourself
             if(address.port === main_node_port)
             {
-                _this.chord_node.predecessor = undefined;
-                _this.chord_node.successor = _this.chord_node.info;
+                _this.predecessor = _this.info;
+                _this.successor = _this.info;
                 console.info("Main node online!");
-                //console.info(_this.chord_node.successor)
             }
             else // If not the main node, join the ring here
             {
@@ -223,83 +186,80 @@ class node
         });
     }
 
-    public find_successor(id, callback)
+    private find_successor_server(id : string, callback : (NodeInfo) => void)
     {
-        function try_next_door(next_door)
+        this.find_neighbours_server(id, function(object : TransferNodePair)
         {
-            // Setup the HTTP request
-            var options = {
-                host: 'localhost',
-                port: next_door,
-                path: '/find_successor?id=' + id
-            };
-            // ... and fire!
-            http.get(options, function(res)
-            {
-                console.log("Got response code: " + res.statusCode);
-                res.on("data", function(chunk)
-                {
-                    console.log("Got response: " + chunk);
-                    var object = JSON.parse(chunk);
-                    callback(object);
-                });
-            }).on('error', function(e)
-            {
-                console.error("Error while joining Chord ring: " + e.message);
-                console.error("Terminating");
-                process.exit(1);
-            });
-        }
+            callback(object.successor);
+        });
+    }
 
-        var _this = this;
-
-        function isBetweenRightIncluded()
-        {
-            var key1 = _this.chord_node.info.id;
-            var key2 = _this.chord_node.successor.id;
-
-            if (
-                // Keys are in order, check that we're inbetween
-                ((key1 < key2) && (key1 < id && id <= key2)) ||
-                // Keys are not in order, if we're larger than both, we must be less than max
-                ((key1 > key2) && ((id > key1 && id >= key2))) ||
-                // Keys are not in order, if we're smaller than both, we must be larger than min
-                ((key1 > key2) && ((id < key1 && id < key2))) ||
-                // We equal key2, so we're in
-                ((id === key2)))
-                {
-                    return true;
-                }
-                return false;
-        }
-
-        if(this.chord_node.info === this.chord_node.successor)
+    private find_neighbours_server(id: string, callback : (TransferNodePair) => void)
+    {
+        // 1 node ring case
+        if(this.info === this.successor)
         {
             // Tell the node, who it is in between
-            callback({
-                "pre": this.chord_node.info,
-                "suc": this.chord_node.info
-            });
+            var payload : TransferNodePair = {
+                predecessor: this.info,
+                successor: this.info
+            };
+            callback(payload);
         }
-        else
+        else // general case
         {
-            var in_between = isBetweenRightIncluded();
-            if(in_between)
+            var in_between : boolean = isBetweenRightIncluded(id, this.info.id, this.successor.id);
+            if(in_between) // In our area of responsability
             {
                 // Tell the node, who it is in between
-                callback({
-                    "pre": this.chord_node.info,
-                    "suc": this.chord_node.successor
-                });
+                var payload : TransferNodePair = {
+                    predecessor: this.info,
+                    successor: this.successor
+                };
+                callback(payload);
             }
-            else
+            else // Not in our area, ask our successor to handle it
             {
-                try_next_door(this.chord_node.successor.port);
+                this.find_neighbours(id, this.successor.port, callback);
             }
         }
     }
 
-    private notify_new_neighbour(inform_port, payload, callback)
+    public find_successor(id : string, port : number, callback : (NodeInfo) => void)
+    {
+        this.find_neighbours(id, port, function(object : TransferNodePair)
+        {
+            callback(object.successor);
+        });
+    }
+
+    public find_neighbours(id: string, port : number, callback : (TransferNodePair) => void)
+    {
+        // Setup the HTTP request
+        var options = {
+            host: 'localhost',
+            port: port,
+            path: '/find_neighbours?id=' + id
+        };
+        // ... and fire!
+        http.get(options, function(res)
+        {
+            console.log("Got response code: " + res.statusCode);
+            res.on("data", function(chunk)
+            {
+                console.log("Got response: " + chunk);
+                var object : TransferNodePair = JSON.parse(chunk);
+                callback(object);
+            });
+        }).on('error', function(e)
+        {
+            console.error("Error while finding neighbours: " + e.message);
+            console.error("Terminating");
+            process.exit(1);
+        });
+    }
+
+    private notify_new_neighbour(inform_port : number, payload : TransferNodePair, callback : () => void)
     {
         // Setup the HTTP request
         var options = {
@@ -318,52 +278,38 @@ class node
             });
         }).on('error', function(e)
         {
-            console.error("Error while joining Chord ring: " + e.message);
+            console.error("Error while joining notifying neighbour: " + e.message);
             console.error("Terminating");
             process.exit(1);
         });
     }
 
     // Function to join the Chord ring, via the known main node
-    private chord_join(join_port)
+    private chord_join(join_port : number) : void
     {
         var _this = this;
-        // Setup the HTTP request
-        var options = {
-            host: 'localhost',
-            port: join_port,
-            path: '/find_successor?id=' + _this.chord_node.info.id
-        };
-        // ... and fire!
-        http.get(options, function(res)
-        {
-            console.log("Got response code: " + res.statusCode);
-            res.on("data", function(chunk)
-            {
-                console.log("Got response: " + chunk);
-                var object = JSON.parse(chunk);
-                _this.chord_node.successor = object.suc;
-                _this.chord_node.predecessor = object.pre;
 
-                var payload = {
-                    "pre": _this.chord_node.info
+        this.find_neighbours(this.info.id, join_port, function(object : TransferNodePair)
+        {
+            _this.successor = object.successor;
+            _this.predecessor = object.predecessor;
+
+            // XXX: Consider using Q instead of layer coding
+            var payload : TransferNodePair = {
+                predecessor: _this.info,
+                successor: undefined
+            };
+            _this.notify_new_neighbour(_this.successor.port, payload, function()
+            {
+                var payload : TransferNodePair = {
+                    predecessor: undefined,
+                    successor: _this.info
                 };
-                _this.notify_new_neighbour(_this.chord_node.successor.port, payload, function()
+                _this.notify_new_neighbour(_this.predecessor.port, payload, function()
                 {
-                    var payload = {
-                        "suc": _this.chord_node.info
-                    };
-                    _this.notify_new_neighbour(_this.chord_node.predecessor.port, payload, function()
-                    {
-                        console.log("Successfully joined the Chord ring");
-                    });
+                    console.log("Successfully joined the Chord ring");
                 });
             });
-        }).on('error', function(e)
-        {
-            console.error("Error while joining Chord ring: " + e.message);
-            console.error("Terminating");
-            process.exit(1);
         });
     }
 }

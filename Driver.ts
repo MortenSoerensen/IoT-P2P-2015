@@ -4,9 +4,9 @@
 declare var process : any;
 
 // The port to host the server at
-var port;
+var port : number;
 // The main_node (known to be running) port
-var main_node_port = 8080;
+var main_node_port : number = 8080;
 
 // Not enough arguments
 if(process.argv.length <= 2)
@@ -36,5 +36,5 @@ else // Enough arguments
     }
 }
 
-var n = new node();
+var n = new Chord();
 n.run(port);

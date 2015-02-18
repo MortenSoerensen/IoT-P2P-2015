@@ -1,3 +1,8 @@
+// Declare the nodejs require function
+declare function require(name : string);
+
+var crypto = require('crypto');
+
 // Function to hash 'str' with the best feasible hashing algorithm
 function hash_string(str)
 {
@@ -35,3 +40,32 @@ function hash_string(str)
     var str_hash = hash_function.update(str).digest('hex');
     return str_hash;
 }
+
+function ip_to_string(ip : string) : string
+{
+    if(ip === "0.0.0.0")
+        return "localhost";
+    else
+        return ip;
+}
+
+function isBetweenRightIncluded(id : string, left_key : string, right_key : string) : boolean
+{
+    var key1 = left_key;
+    var key2 = right_key;
+
+    if (
+        // Keys are in order, check that we're inbetween
+        ((key1 < key2) && (key1 < id && id <= key2)) ||
+        // Keys are not in order, if we're larger than both, we must be less than max
+        ((key1 > key2) && ((id > key1 && id >= key2))) ||
+        // Keys are not in order, if we're smaller than both, we must be larger than min
+        ((key1 > key2) && ((id < key1 && id < key2))) ||
+        // We equal key2, so we're in
+        ((id === key2)))
+        {
+            return true;
+        }
+        return false;
+}
+
