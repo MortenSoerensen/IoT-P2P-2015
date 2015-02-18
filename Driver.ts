@@ -36,4 +36,5 @@ else // Enough arguments
     }
 }
 
-node.run(port);
+var n = new node();
+n.run(port);

@@ -15,7 +15,7 @@ clean:
 run: output/Driver.js
 	node output/Driver.js main_node
 
-spawn: output/Chord.js
+spawn: output/Driver.js
 	node ChordSpawner.js 50
 
 render:

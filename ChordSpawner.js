@@ -15,20 +15,29 @@ else // Enough arguments
 {
     nodes = parseInt(process.argv[2]);
 }
-// Start spawning nodes
-var main_node = null;
+// Spawn the main node
 if(nodes >= 1)
 {
     // Spawn the main node
-    main_node = spawn('node', ["output/Driver.js", "main_node"]);
+    var main_node = spawn('node', ["output/Driver.js", "main_node"]);
     // Print out any errors detected
     main_node.stderr.on('data', function(data) {
         console.log(data.toString());
     });
+
+   readline.createInterface({
+      input     : main_node.stdout,
+      terminal  : false
+    }).on('line', function(line) {
+        if(line == "Main node online!")
+        {
+            // Main node is online!
+            // Start spawning nodes
+            start(0);
+        }
+    });
 }
-
-//var default_nodes = [];
-
+// Recursive spawner function
 var start = function recurse(i)
 {
     // Check if all nodes have been created
@@ -56,5 +65,3 @@ var start = function recurse(i)
         console.error(data.toString());
     });
 }
-// Start spawning nodes
-start(0);

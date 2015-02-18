@@ -1,0 +1,41 @@
+<html>
+<head>
+    <title>Chord Node</title>
+</head>
+<body>
+ID: %%ID%%</br>
+IP: %%IP%%</br>
+PORT: %%PORT%%</br>
+</br>
+successor: <a href="http://%%SUCC-IP%%:%%SUCC-PORT%%">visit successor</a>
+</br>
+predecessor: <a href="http://%%PRED-IP%%:%%PRED-PORT%%">visit predecessor</a>
+</br>
+</br>
+<label>Enter ID:</label>
+<textarea id="succ" rows="1" cols="10"></textarea>
+<button onclick="find_succ()">Find responsible node</button>
+<script>
+    function find_succ()
+    {
+        var succ = document.getElementById("succ");
+        alert(succ.value);
+        var xmlhttp = new XMLHttpRequest();
+        var url = "find_successor?id=" + succ.value;
+        xmlhttp.onreadystatechange = function()
+        {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+            {
+                alert(xmlhttp.responseText);
+                var json = JSON.parse(xmlhttp.responseText);
+                var goto = "http://" + json.suc.ip + ":" + json.suc.port;
+                alert(goto);
+                window.location.href = goto;
+            }
+        }
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+    }
+</script>
+</body>
+</html>
