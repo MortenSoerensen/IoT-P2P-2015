@@ -41,7 +41,107 @@ class Chord implements IChord
         });
     }
 
-    public run(host_port : number) : void
+    public handler(url_parts : string, path_name : string, query : any, res : any)
+    {
+        var _this = this;
+        switch(path_name)
+        {
+            // Browser html info page
+        case "/":
+            var data = _this.template_string;
+            data = data.replace(/%%ID%%/g, _this.info.id);
+            data = data.replace(/%%IP%%/g, _this.info.ip);
+            data = data.replace(/%%PORT%%/g, _this.info.port.toString());
+
+            data = data.replace(/%%SUCC-IP%%/g, _this.successor.ip);
+            data = data.replace(/%%SUCC-PORT%%/g, _this.successor.port.toString());
+
+            data = data.replace(/%%PRED-IP%%/g, _this.predecessor.ip);
+            data = data.replace(/%%PRED-PORT%%/g, _this.predecessor.port.toString());
+
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.write(data);
+            res.end();
+            break;
+
+        case "/leave":
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            // Inform our successor of it's now predecessor
+            var payload : TransferNodePair = {
+                predecessor: _this.predecessor,
+                successor: undefined
+            };
+            _this.notify_new_neighbour(_this.successor.port, payload, function()
+            {
+                // Inform our predecessor of it's now successor
+                var payload : TransferNodePair = {
+                    predecessor: undefined,
+                    successor: _this.successor
+                };
+                _this.notify_new_neighbour(_this.predecessor.port, payload, function()
+                {
+                    // We're out of the loop!
+                    res.write("Left the Chord Ring successfully!");
+                    res.end();
+
+                    console.warn("Left the Chord ring!");
+                    console.warn("Terminating");
+                    process.exit(1);
+                });
+            });
+            break;
+
+        case "/find_successor":
+            var id = query.id;
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            _this.find_successor_server(id, function(suc : NodeInfo)
+            {
+                console.warn(suc);
+                res.write(JSON.stringify(suc));
+                res.end();
+            });
+            break;
+
+        case "/find_neighbours":
+            var id = query.id;
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            _this.find_neighbours_server(id, function(pair : TransferNodePair)
+            {
+                res.write(JSON.stringify(pair));
+                res.end();
+            });
+            break;
+
+            // JSON notify query (i.e. update your successor or predecessor)
+        case "/notify":
+            var info : TransferNodePair = JSON.parse(decodeURIComponent(query.info));
+            // Update pre
+            if(info.predecessor !== undefined)
+            {
+                console.warn("New predecessor");
+                _this.predecessor = info.predecessor;
+            }
+            // Update suc
+            if(info.successor !== undefined)
+            {
+                console.warn("New successor");
+                _this.successor = info.successor;
+            }
+            // Went well
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.write("SUCCES!");
+            res.end();
+            break;
+
+        default:
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.write("No such page! - " + path_name);
+            res.end();
+            break;
+        }
+    }
+
+    public run(host_port : number, handler_override : any) : void
     {
         var _this = this;
         var server = http.createServer(function(req, res)
@@ -56,100 +156,13 @@ class Chord implements IChord
             console.info("Query parameters are:");
             console.log(query); 
 
-            switch(path_name)
+            if(handler_override != undefined)
             {
-                // Browser html info page
-            case "/":
-                var data = _this.template_string;
-                data = data.replace(/%%ID%%/g, _this.info.id);
-                data = data.replace(/%%IP%%/g, _this.info.ip);
-                data = data.replace(/%%PORT%%/g, _this.info.port.toString());
-
-                data = data.replace(/%%SUCC-IP%%/g, _this.successor.ip);
-                data = data.replace(/%%SUCC-PORT%%/g, _this.successor.port.toString());
-
-                data = data.replace(/%%PRED-IP%%/g, _this.predecessor.ip);
-                data = data.replace(/%%PRED-PORT%%/g, _this.predecessor.port.toString());
-
-                res.writeHead(200, {'Content-Type': 'text/html'});
-                res.write(data);
-                res.end();
-                break;
-
-            case "/leave":
-                res.writeHead(200, {'Content-Type': 'text/plain'});
-                // Inform our successor of it's now predecessor
-                var payload : TransferNodePair = {
-                    predecessor: _this.predecessor,
-                    successor: undefined
-                };
-                _this.notify_new_neighbour(_this.successor.port, payload, function()
-                {
-                    // Inform our predecessor of it's now successor
-                    var payload : TransferNodePair = {
-                        predecessor: undefined,
-                        successor: _this.successor
-                    };
-                    _this.notify_new_neighbour(_this.predecessor.port, payload, function()
-                    {
-                        // We're out of the loop!
-                        res.write("Left the Chord Ring successfully!");
-                        res.end();
-
-                        console.warn("Left the Chord ring!");
-                        console.warn("Terminating");
-                        process.exit(1);
-                    });
-                });
-                break;
-
-            case "/find_successor":
-                var id = query.id;
-                res.writeHead(200, {'Content-Type': 'application/json'});
-                _this.find_successor_server(id, function(suc : NodeInfo)
-                {
-                    console.warn(suc);
-                    res.write(JSON.stringify(suc));
-                    res.end();
-                });
-                break;
-
-            case "/find_neighbours":
-                var id = query.id;
-                res.writeHead(200, {'Content-Type': 'application/json'});
-                _this.find_neighbours_server(id, function(pair : TransferNodePair)
-                {
-                    res.write(JSON.stringify(pair));
-                    res.end();
-                });
-                break;
-
-            // JSON notify query (i.e. update your successor or predecessor)
-            case "/notify":
-                var info : TransferNodePair = JSON.parse(decodeURIComponent(query.info));
-                // Update pre
-                if(info.predecessor !== undefined)
-                {
-                    console.warn("New predecessor");
-                    _this.predecessor = info.predecessor;
-                }
-                // Update suc
-                if(info.successor !== undefined)
-                {
-                    console.warn("New successor");
-                    _this.successor = info.successor;
-                }
-                // Went well
-                res.writeHead(200, {'Content-Type': 'text/plain'});
-                res.write("SUCCES!");
-                res.end();
-                break;
-
-            default:
-                res.writeHead(404, {'Content-Type': 'text/plain'});
-                res.write("No such page! - " + path_name);
-                res.end();
-                break;
+                handler_override(url_parts, path_name, query, res);
+            }
+            else
+            {
+                _this.handler(url_parts, path_name, query, res);
             }
         });
         // Start the server!
