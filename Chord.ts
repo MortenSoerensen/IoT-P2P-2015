@@ -170,6 +170,7 @@ class Chord implements IChord
         {
             // Inform the allocated port
             var address = server.address();
+            address.address = "localhost"; //TODO; temporary fix that works for localhost only
             console.log("Running Chord node at port: " + address.port);
 
             // Calculate the node id
