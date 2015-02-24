@@ -176,11 +176,11 @@ class Chord implements IChord
             // Calculate the node id
             var server_address_string = address.address + ":" + address.port;
             console.info("Full server address: " + server_address_string);
-            var node_id = hash_string(server_address_string);
+            var node_id = utils.hash_string(server_address_string);
             console.info("Node has id: " + node_id);
             // Assign the node id
             _this.info.id = node_id;
-            _this.info.ip = ip_to_string(address.address);
+            _this.info.ip = utils.ip_to_string(address.address);
             _this.info.port = address.port;
 
             // If we're the main node, setup the successor as ourself
@@ -222,7 +222,7 @@ class Chord implements IChord
         }
         else // general case
         {
-            var in_between : boolean = isBetweenRightIncluded(id, this.info.id, this.successor.id);
+            var in_between : boolean = utils.is_between_cyclic(id, this.info.id, this.successor.id);
             if(in_between) // In our area of responsability
             {
                 // Tell the node, who it is in between

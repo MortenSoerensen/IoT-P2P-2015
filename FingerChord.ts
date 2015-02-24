@@ -1,41 +1,47 @@
 /// <reference path='Chord.ts'/>
 
-    var fingertableSize: number = 3;
-    //var fingertable: Array<NodeInfo> = [0,1,2];
-
 class FingerChord extends Chord
 {
+    static fingertableSize : number = 3;
+    static fingertableSpan : number = Math.pow(2, (FingerChord.fingertableSize-1));
+    private fingertable : Array<NodeInfo>;
+
     constructor()
     {
         super();
         console.warn("FingerChord");  
-    }
 
-    public run(host_port : number, handler_override : any) : void
-    {
-        super.run(host_port, handler_override);
-    }
-
-    private build_fingertable() : void
-    {
-        //fingertable.length = fingertableSize;
-        /*if()
-        {
-
-        }
-        */
-
+        this.fingertable = Array<NodeInfo>(3);
     }
 
     public handler(url_parts : string, path_name : string, query : any, res : any)
     {
         if(path_name === "/update_finger")
         {
-            res.writeHead(200, {'Content-Type': 'application/JSON'});
-            //update fingers, callbackk when done {
-            res.write(JSON.stringify(this.successor));
-            res.end();
-            // }
+            // NOTE: Should probably take an id of the inserted node as url argument
+            // XXX: var insertID = query['insertID']
+            function update_finger_worker(callback : () => void)
+            {
+                // TODO: Update the finger table:
+                //
+                // XXX: Loop through the fingers, find the insertion spot,
+                //      i.e. between which fingers the new node was inserted.
+                // XXX: Update all the ones after the insertion spot with +1
+                //      i.e. go to the finger, and find it predecessor, it's the new finger.
+                // XXX: Check if our finger table is filled, if so return now.
+                // XXX: Check if there's enough additional nodes to extend our finger table.
+                //      i.e. by doing a linear search forward.
+                // XXX: Call callback when everything is done
+                callback();
+            }
+
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            // Update the finger table, and respond when done
+            update_finger_worker(function()
+            {
+                res.write("SUCCES!");
+                res.end();
+            });
         }
         if(path_name === "/pre")
         {
@@ -49,15 +55,40 @@ class FingerChord extends Chord
             res.write(JSON.stringify(this.successor));
             res.end();
         }
-        else super.handler(url_parts, path_name, query, res)
+        else
+        {
+            super.handler(url_parts, path_name, query, res);
+        }
     }
 
 
     // Function to join the Chord ring, via the known main node
     protected chord_join(join_port : number) : void
     {
+        function invoke_update_finger(port, callback)
+        {
+            // Setup the HTTP request
+            var options = {
+                host: 'localhost',
+                port: port,
+                path: '/update_finger'
+            };
+            // ... and fire!
+            http.get(options, function(res)
+            {
+                res.on("data", function(chunk)
+                {
+                    callback();
+                });
+            }).on('error', function(e)
+            {
+                console.error("Error while calling invoke_update_finger: " + e.message);
+                console.error("Terminating");
+                process.exit(1);
+            });
+        }
 
-        function getpredecessor(port, callback)
+        function get_predecessor(port, callback)
         {
             // Setup the HTTP request
             var options = {
@@ -74,58 +105,39 @@ class FingerChord extends Chord
                 });
             }).on('error', function(e)
             {
-                console.error("Error while calling get_info: " + e.message);
+                console.error("Error while calling get_predecessor: " + e.message);
                 console.error("Terminating");
                 process.exit(1);
             });
         }
-    var _this = this;   
-    var starter = function recursivepred(nodesVisited, current: NodeInfo)
-    {
-        if(nodesVisited === Math.pow(2,(fingertableSize-1)) || current.port === _this.info.port)
+        var _this = this;   
+        var starter = function recursive_pred(nodesVisited : number, current: NodeInfo)
         {
-            console.log("Successfully joined the Chord ring");
-            return;
-        }
-        else
-        {
-            //update your fingers, callback when done {
-            getpredecessor(current.port, function(predecessor: NodeInfo)
+            if(nodesVisited === FingerChord.fingertableSpan 
+            || current.port === _this.info.port)
             {
-                recursivepred(nodesVisited+1, predecessor);
-            });
-            //}
-        }
-    }
-    var successors = function recursivesuc(nodesVisited, current: NodeInfo)
-    {
-        if(nodesVisited === Math.pow(2,(fingertableSize-1)) || current.port === _this.info.port)
-        {
-            console.log("Successfully joined the Chord ring");
-            return;
-        }
-        else
-        {
-            //update your fingers, callback when done {
-            getpredecessor(current.port, function(predecessor: NodeInfo)
+                console.log("Successfully joined the Chord ring");
+                return;
+            }
+            else
             {
-                recursivesuc(nodesVisited+1, predecessor);
-            });
-            //}
+                // Update the fingers of current
+                invoke_update_finger(current.port, function()
+                {
+                    // Get the predecessor of current, and recurse on that
+                    get_predecessor(current.port, function(predecessor: NodeInfo)
+                    {
+                        recursive_pred(nodesVisited+1, predecessor);
+                    });
+                });
+            }
         }
-    }
-        super.chord_join(join_port, function(){
-            //initialize fingers for n
-            //build_fingertable();
-            //loop through predecessors
-            starter(0, _this.info);
-
-
+        super.chord_join(join_port, function()
+        {
+            // Tell everyone before us to update their fingers
+            starter(0, _this.predecessor);
+            // TODO: We need to build our own initial finger table
+            // XXX: Ask someone for theirs, and use that to construct ours
         });
-        //this.build_fingertable();
-      //  for (var i = 0; i < fingertable.length; i+1) {
-           // var successor: NodeInfo = handler()
-            //fingertable[i] = 
-       // };
     }
 }
