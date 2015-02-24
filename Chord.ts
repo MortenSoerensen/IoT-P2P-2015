@@ -15,9 +15,9 @@ var url  = require('url');
 class Chord implements IChord
 {
     // Information object about this chord node
-    private info : NodeInfo;
-    private successor : NodeInfo;
-    private predecessor : NodeInfo;
+    protected info : NodeInfo;
+    protected successor : NodeInfo;
+    protected predecessor : NodeInfo;
 
     // HTML template
     private template_string : string;

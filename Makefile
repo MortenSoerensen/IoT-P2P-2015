@@ -6,7 +6,7 @@ output/DONT_DELETE:
 	mkdir -p output
 	echo "DONT_DELETE" > output/DONT_DELETE
 
-output/Driver.js: Driver.ts Chord.ts IChord.ts utils.ts output/DONT_DELETE
+output/Driver.js: Driver.ts Chord.ts FingerChord.ts IChord.ts utils.ts output/DONT_DELETE
 	tsc Driver.ts -out output/Driver.js
 
 clean:
