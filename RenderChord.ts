@@ -14,8 +14,8 @@ class RenderChord<T extends IChord> implements IChord
     {
         if(path_name === "/all")
         {
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write("Found in RenderChord.ts");
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            res.write(JSON.stringify(this));
             res.end();
         }
         else
