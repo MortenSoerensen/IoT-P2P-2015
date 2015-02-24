@@ -193,7 +193,9 @@ class Chord implements IChord
             else // If not the main node, join the ring here
             {
                 console.info("Trying to join Chord ring:");
-                _this.chord_join(main_node_port);
+                _this.chord_join(main_node_port, function(){
+                    console.log("Successfully joined the Chord ring");
+                });
             }
         });
     }
@@ -297,7 +299,7 @@ class Chord implements IChord
     }
 
     // Function to join the Chord ring, via the known main node
-    private chord_join(join_port : number) : void
+    protected chord_join(join_port : number, callback : () => void) : void
     {
         var _this = this;
 
@@ -319,7 +321,8 @@ class Chord implements IChord
                 };
                 _this.notify_new_neighbour(_this.predecessor.port, payload, function()
                 {
-                    console.log("Successfully joined the Chord ring");
+                   // console.log("Successfully joined the Chord ring");
+                   callback();
                 });
             });
         });
