@@ -18,7 +18,6 @@ class FingerChord extends Chord
     {
         if(path_name === "/update_finger")
         {
-
             function get_successor(port, callback)
             {
                 // Setup the HTTP request
@@ -107,6 +106,8 @@ class FingerChord extends Chord
                 // XXX: Call callback when everything is done
             }
 
+            //setInterval(function() { update_finger_worker(function() {});}, 10000);
+
             res.writeHead(200, {'Content-Type': 'text/plain'});
             // Update the finger table, and respond when done
             update_finger_worker(function()
@@ -135,6 +136,9 @@ class FingerChord extends Chord
 
     protected find_neighbours_server(id: string, callback : (TransferNodePair) => void)
     {
+        
+            super.find_neighbours_server(id, callback);
+            /*
         if(this.info === this.successor || utils.is_between_cyclic(id, this.info.id, this.successor.id))
         {
             super.find_neighbours_server(id, callback);
@@ -161,6 +165,7 @@ class FingerChord extends Chord
                 }
             }
         }
+        */
     }
 
     // Function to join the Chord ring, via the known main node
@@ -214,7 +219,7 @@ class FingerChord extends Chord
         var _this = this;   
         var starter = function recursive_pred(nodesVisited : number, current: NodeInfo)
         {
-            if(nodesVisited === FingerChord.fingertableSpan)
+            if(nodesVisited === FingerChord.fingertableSpan+1)
             {
                 console.log("Successfully joined the Chord ring");
                 return;
