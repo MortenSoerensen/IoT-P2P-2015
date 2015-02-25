@@ -49,12 +49,6 @@ class FingerChord extends Chord
             var _this = this;
             var checkForTableExpansion = function recursive_suc(nodesVisited : number, current: NodeInfo, callback : () => void)
             {
-               /* if(current.port === _this.info.port)
-                {
-                    console.log("Reached the current node, fingertable updated.");
-                    callback();
-                    return;
-                }*/
                 for(var i=1;i<=FingerChord.fingertableSize;i++)
                 {
                     var l = Math.pow(2,i);
@@ -74,6 +68,13 @@ class FingerChord extends Chord
                     // Get the successor of current, and recurse on that
                     get_successor(current.port, function(successor: NodeInfo)
                     {
+                        if(successor.port === _this.info.port)
+                        {
+                            console.log("Reached the current node, fingertable updated.");
+                            callback();
+                            return;
+                        }
+
                         //build initial table, check for port?
                         recursive_suc(nodesVisited+1, successor, callback);
                     });
@@ -220,8 +221,7 @@ class FingerChord extends Chord
         var _this = this;   
         var starter = function recursive_pred(nodesVisited : number, current: NodeInfo)
         {
-            if(nodesVisited === FingerChord.fingertableSpan 
-            || current.port === _this.info.port)
+            if(nodesVisited === FingerChord.fingertableSpan)
             {
                 console.log("Successfully joined the Chord ring");
                 return;
@@ -234,6 +234,12 @@ class FingerChord extends Chord
                     // Get the predecessor of current, and recurse on that
                     get_predecessor(current.port, function(predecessor: NodeInfo)
                     {
+                        if(predecessor.port === _this.info.port)
+                        {
+                            console.log("Successfully joined the Chord ring");
+                            return;
+                        }
+    
                         recursive_pred(nodesVisited+1, predecessor);
                     });
                 });
@@ -242,7 +248,7 @@ class FingerChord extends Chord
         super.chord_join(join_port, function()
         {
             // Tell everyone before us to update their fingers
-            starter(0, _this.predecessor);
+            starter(0, _this.info);
             // TODO: We need to build our own initial finger table
             // XXX: Ask someone for theirs, and use that to construct ours
             // is the finger table of the predecessor not

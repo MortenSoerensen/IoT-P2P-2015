@@ -1,4 +1,4 @@
-.PHONY: all clean run spawn render
+.PHONY: all clean run spawn render build
 
 all: spawn
 
@@ -8,6 +8,8 @@ output/DONT_DELETE:
 
 output/Driver.js: Driver.ts Chord.ts FingerChord.ts RenderChord.ts IChord.ts utils.ts output/DONT_DELETE
 	tsc Driver.ts -out output/Driver.js
+
+build: output/Driver.js
 
 clean:
 	rm -rf output
