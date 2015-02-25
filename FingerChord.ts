@@ -133,6 +133,35 @@ class FingerChord extends Chord
         }
     }
 
+    protected find_neighbours_server(id: string, callback : (TransferNodePair) => void)
+    {
+        if(this.info === this.successor || utils.is_between_cyclic(id, this.info.id, this.successor.id))
+        {
+            super.find_neighbours_server(id, callback);
+        }
+        else
+        {
+            var lookup : Array<NodeInfo> = Array(FingerChord.fingertableSize+1);
+            lookup[0] = this.successor;
+            for(var i=0;i<=FingerChord.fingertableSize;i++)
+            {
+                lookup[1+i] = this.fingertable[i];
+            }
+            for(var i=0;i<FingerChord.fingertableSize;i++)
+            {
+                if(lookup[i+1] === null || lookup[i+1] === undefined)
+                {
+                    super.find_neighbours(id, lookup[i].port, callback);
+                    break;
+                }
+                else if(utils.is_between_cyclic(id, lookup[i].id, lookup[i+1].id))
+                {
+                    super.find_neighbours(id, lookup[i].port, callback);
+                    break;
+                }
+            }
+        }
+    }
 
     // Function to join the Chord ring, via the known main node
     protected chord_join(join_port : number) : void
