@@ -23,4 +23,7 @@ spawn: output/Driver.js
 render:
 	mkdir -p output
 	node ChordRender.js
-	dot -Tpng output/Chord.dot -o output/Chord.png
+	circo output/Chord.dot > output/Chord_circo.dot
+	sed -e '/}/ {' -e 'r output/Finger_edges.dot_frag' -e 'd' -e '}' output/Chord_circo.dot > output/Chord_finger.dot
+	neato -n output/Chord_circo.dot -Tpng -O
+	neato -n output/Chord_finger.dot -Tpng -O
