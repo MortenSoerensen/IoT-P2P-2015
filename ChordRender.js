@@ -37,7 +37,7 @@ stream.once('open', function(fd)
     {
         current = current.node;
         stream.write("port" + current.info.port + " [label=\"" + current.info.ip + ":" + current.info.port + "\" color=red, shape=circle];\n");
-        //stream.write("port" + current.predecessor.port + " -> " + "port" + current.info.port + ";\n");
+        stream.write("port" + current.info.port + " -> " + "port" + current.successor.port + " [color=red];\n");
         stream.write("port" + current.info.port + " -> " + "port" + current.predecessor.port + ";\n");
         if(current.successor.port == 8080)
         {
