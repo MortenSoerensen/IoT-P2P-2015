@@ -20,7 +20,7 @@ class Chord implements IChord
     protected predecessor : NodeInfo;
 
     // HTML template
-    private template_string : string;
+    protected template_string : string;
 
     constructor()
     {

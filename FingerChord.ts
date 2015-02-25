@@ -9,6 +9,7 @@ class FingerChord extends Chord
     constructor()
     {
         super();
+        var _this = this;
         console.warn("FingerChord");  
 
         this.fingertable = Array<NodeInfo>(3);
@@ -27,7 +28,6 @@ class FingerChord extends Chord
         });
     }
 
-    // TODO: Webinterface support
     // TODO: Graceful leave
 
     public handler(url_parts : string, path_name : string, query : any, res : any)
@@ -142,6 +142,12 @@ class FingerChord extends Chord
         {
             res.writeHead(200, {'Content-Type': 'application/JSON'});
             res.write(JSON.stringify(this.successor));
+            res.end();
+        }
+        else if(path_name === "/get_fingertable")
+        {
+            res.writeHead(200, {'Content-Type': 'application/JSON'});
+            res.write(JSON.stringify(this.fingertable));
             res.end();
         }
         else
