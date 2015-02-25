@@ -14,11 +14,6 @@ class FingerChord extends Chord
         this.fingertable = Array<NodeInfo>(3);
     }
 
-    private super_find_successor(id : string, port : number, callback : (NodeInfo) => void)
-    {
-        super.find_successor(id, port, callback);
-    }
-
     public handler(url_parts : string, path_name : string, query : any, res : any)
     {
         if(path_name === "/update_finger")
@@ -132,43 +127,41 @@ class FingerChord extends Chord
             res.write(JSON.stringify(this.successor));
             res.end();
         }
-        else if(path_name === "/find_successor")
-        {
-            var _this = this;
-            function find_successor(callback : () => void)
-            {
-                var id = query.id;
-                if(utils.is_between_cyclic(id, _this.info.id, _this.successor.id))
-                {
-                    _this.super_find_successor(id, _this.info.port, callback);
-                }
-                else
-                {
-                    for (var i=0;i<FingerChord.fingertableSize-1;i++)
-                    {
-                        if(utils.is_between_cyclic(id, _this.fingertable[i].id, _this.fingertable[i+1].id))
-                        {
-                            _this.super_find_successor(id, _this.info.port, callback);
-                        }
-                    }
-                }
-
-            }
-
-            res.writeHead(200, {'Content-Type': 'application/JSON'});
-
-            find_successor(function()
-            {
-                res.write("Successor found!");
-                res.end();
-            });
-        }
         else
         {
             super.handler(url_parts, path_name, query, res);
         }
     }
 
+    protected find_neighbours_server(id: string, callback : (TransferNodePair) => void)
+    {
+        if(this.info === this.successor || utils.is_between_cyclic(id, this.info.id, this.successor.id))
+        {
+            super.find_neighbours_server(id, callback);
+        }
+        else
+        {
+            var lookup : Array<NodeInfo> = Array(FingerChord.fingertableSize+1);
+            lookup[0] = this.successor;
+            for(var i=0;i<=FingerChord.fingertableSize;i++)
+            {
+                lookup[1+i] = this.fingertable[i];
+            }
+            for(var i=0;i<FingerChord.fingertableSize;i++)
+            {
+                if(lookup[i+1] === null || lookup[i+1] === undefined)
+                {
+                    super.find_neighbours(id, lookup[i].port, callback);
+                    break;
+                }
+                else if(utils.is_between_cyclic(id, lookup[i].id, lookup[i+1].id))
+                {
+                    super.find_neighbours(id, lookup[i].port, callback);
+                    break;
+                }
+            }
+        }
+    }
 
     // Function to join the Chord ring, via the known main node
     protected chord_join(join_port : number) : void

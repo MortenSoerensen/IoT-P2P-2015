@@ -208,7 +208,7 @@ class Chord implements IChord
         });
     }
 
-    private find_neighbours_server(id: string, callback : (TransferNodePair) => void)
+    protected find_neighbours_server(id: string, callback : (TransferNodePair) => void)
     {
         // 1 node ring case
         if(this.info === this.successor)
