@@ -14,6 +14,11 @@ class FingerChord extends Chord
         this.fingertable = Array<NodeInfo>(3);
     }
 
+    private super_find_successor(id : string, port : number, callback : (NodeInfo) => void)
+    {
+        super.find_successor(id, port, callback);
+    }
+
     public handler(url_parts : string, path_name : string, query : any, res : any)
     {
         if(path_name === "/update_finger")
@@ -125,6 +130,37 @@ class FingerChord extends Chord
             res.writeHead(200, {'Content-Type': 'application/JSON'});
             res.write(JSON.stringify(this.successor));
             res.end();
+        }
+        else if(path_name === "/find_successor")
+        {
+            var _this = this;
+            function find_successor(callback : () => void)
+            {
+                var id = query.id;
+                if(utils.is_between_cyclic(id, _this.info.id, _this.successor.id))
+                {
+                    _this.super_find_successor(id, _this.info.port, callback);
+                }
+                else
+                {
+                    for (var i=0;i<FingerChord.fingertableSize-1;i++)
+                    {
+                        if(utils.is_between_cyclic(id, _this.fingertable[i].id, _this.fingertable[i+1].id))
+                        {
+                            _this.super_find_successor(id, _this.info.port, callback);
+                        }
+                    }
+                }
+
+            }
+
+            res.writeHead(200, {'Content-Type': 'application/JSON'});
+
+            find_successor(function()
+            {
+                res.write("Successor found!");
+                res.end();
+            });
         }
         else
         {
