@@ -12,7 +12,23 @@ class FingerChord extends Chord
         console.warn("FingerChord");  
 
         this.fingertable = Array<NodeInfo>(3);
+
+        // Pre-load the html template
+        var fs = require('fs')
+        fs.readFile('template-finger.html', 'utf8', function (err, data)
+        {
+            if (err)
+            {
+                console.error("Error loading html template: " + err);
+                console.error("Terminating");
+                process.exit(1);
+            }
+            _this.template_string = data;
+        });
     }
+
+    // TODO: Webinterface support
+    // TODO: Graceful leave
 
     public handler(url_parts : string, path_name : string, query : any, res : any)
     {
@@ -136,10 +152,7 @@ class FingerChord extends Chord
 
     protected find_neighbours_server(id: string, callback : (TransferNodePair) => void)
     {
-        
-            super.find_neighbours_server(id, callback);
-            /*
-        if(this.info === this.successor || utils.is_between_cyclic(id, this.info.id, this.successor.id))
+        if((this.info === this.successor) || (utils.is_between_cyclic(id, this.info.id, this.successor.id)))
         {
             super.find_neighbours_server(id, callback);
         }
@@ -147,11 +160,11 @@ class FingerChord extends Chord
         {
             var lookup : Array<NodeInfo> = Array(FingerChord.fingertableSize+1);
             lookup[0] = this.successor;
-            for(var i=0;i<=FingerChord.fingertableSize;i++)
+            for(var i=0;i<FingerChord.fingertableSize;i++)
             {
                 lookup[1+i] = this.fingertable[i];
             }
-            for(var i=0;i<FingerChord.fingertableSize;i++)
+            for(var i=0;;i++)
             {
                 if(lookup[i+1] === null || lookup[i+1] === undefined)
                 {
@@ -165,7 +178,6 @@ class FingerChord extends Chord
                 }
             }
         }
-        */
     }
 
     // Function to join the Chord ring, via the known main node
