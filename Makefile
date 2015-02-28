@@ -1,4 +1,4 @@
-.PHONY: all clean run spawn render build
+.PHONY: all clean run spawn render build conf_res
 
 all: spawn
 
@@ -6,7 +6,13 @@ output/DONT_DELETE:
 	mkdir -p output
 	echo "DONT_DELETE" > output/DONT_DELETE
 
-output/Driver.js: Driver.ts Chord.ts FingerChord.ts RenderChord.ts IChord.ts utils.ts output/DONT_DELETE
+output/ResourceConfigurator.js: ResourceConfigurator.ts utils.ts
+	tsc ResourceConfigurator.ts -out output/ResourceConfigurator.js
+
+conf_res: output/ResourceConfigurator.js
+	node output/ResourceConfigurator.js
+
+output/Driver.js: Driver.ts Chord.ts ResourceChord.ts FingerChord.ts RenderChord.ts IChord.ts utils.ts ChordHelper.ts output/DONT_DELETE
 	tsc Driver.ts -out output/Driver.js
 
 build: output/Driver.js

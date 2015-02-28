@@ -1,6 +1,6 @@
-/// <reference path='utils.ts'/>
 /// <reference path='Chord.ts'/>
 /// <reference path='FingerChord.ts'/>
+/// <reference path='ResourceChord.ts'/>
 /// <reference path='RenderChord.ts'/>
 
 declare var process : any;
@@ -38,5 +38,5 @@ else // Enough arguments
     }
 }
 
-var n = new RenderChord<FingerChord>(new FingerChord());
+var n : IChord = new RenderChord<ResourceChord>(new ResourceChord());
 n.run(port);

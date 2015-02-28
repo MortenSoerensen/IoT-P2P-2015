@@ -174,12 +174,12 @@ class FingerChord extends Chord
             {
                 if(lookup[i+1] === null || lookup[i+1] === undefined)
                 {
-                    super.find_neighbours(id, lookup[i].port, callback);
+                    ChordHelper.find_neighbours(id, lookup[i].port, callback);
                     break;
                 }
                 else if(utils.is_between_cyclic(id, lookup[i].id, lookup[i+1].id))
                 {
-                    super.find_neighbours(id, lookup[i].port, callback);
+                    ChordHelper.find_neighbours(id, lookup[i].port, callback);
                     break;
                 }
             }

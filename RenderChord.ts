@@ -32,14 +32,4 @@ class RenderChord<T extends IChord> implements IChord
             _this.handler(url_parts, path_name, query, res);
         });
     }
-
-    public find_successor(id : string, port : number, callback : (NodeInfo) => void)
-    {
-        this.node.find_successor(id, port, callback);
-    }
-
-    public find_neighbours(id : string, port : number, callback : (TransferNodePair) => void)
-    {
-        this.node.find_neighbours(id, port, callback);
-    }
 }
