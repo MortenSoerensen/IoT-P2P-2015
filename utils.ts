@@ -1,3 +1,5 @@
+declare var process : any;
+
 module utils
 {
     // Declare the nodejs require function

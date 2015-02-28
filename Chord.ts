@@ -5,6 +5,8 @@
 // * Bonus: Gør jeres ring robust over churn v.hj.a. successorlister.
 
 /// <reference path='IChord.ts'/>
+/// <reference path='ChordHelper.ts'/>
+/// <reference path='utils.ts'/>
 
 // Declare the nodejs require function
 declare function require(name : string);
@@ -234,43 +236,9 @@ class Chord implements IChord
             }
             else // Not in our area, ask our successor to handle it
             {
-                this.find_neighbours(id, this.successor.port, callback);
+                ChordHelper.find_neighbours(id, this.successor.port, callback);
             }
         }
-    }
-
-    public find_successor(id : string, port : number, callback : (NodeInfo) => void)
-    {
-        this.find_neighbours(id, port, function(object : TransferNodePair)
-        {
-            callback(object.successor);
-        });
-    }
-
-    public find_neighbours(id: string, port : number, callback : (TransferNodePair) => void)
-    {
-        // Setup the HTTP request
-        var options = {
-            host: 'localhost',
-            port: port,
-            path: '/find_neighbours?id=' + id
-        };
-        // ... and fire!
-        http.get(options, function(res)
-        {
-            console.log("Got response code: " + res.statusCode);
-            res.on("data", function(chunk)
-            {
-                console.log("Got response: " + chunk);
-                var object : TransferNodePair = JSON.parse(chunk);
-                callback(object);
-            });
-        }).on('error', function(e)
-        {
-            console.error("Error while finding neighbours: " + e.message);
-            console.error("Terminating");
-            process.exit(1);
-        });
     }
 
     private notify_new_neighbour(inform_port : number, payload : TransferNodePair, callback : () => void)
@@ -303,7 +271,7 @@ class Chord implements IChord
     {
         var _this = this;
 
-        this.find_neighbours(this.info.id, join_port, function(object : TransferNodePair)
+        ChordHelper.find_neighbours(this.info.id, join_port, function(object : TransferNodePair)
         {
             _this.successor = object.successor;
             _this.predecessor = object.predecessor;
