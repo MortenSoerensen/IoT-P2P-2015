@@ -2,7 +2,7 @@
 
 class ResourceChord extends Chord
 {
-    private resources : any = {};
+    protected resources : any = {};
 
     constructor()
     {
@@ -10,27 +10,27 @@ class ResourceChord extends Chord
         console.warn("ResourceChord");
     }
 
+    protected get_resource_json(url : string, callback : (any) => void) : void
+    {
+        var https = require('https');
+        https.get(url, function(res)
+        {
+            console.log("Got response code: " + res.statusCode);
+            res.on("data", function(chunk)
+            {
+                console.log("Got response: " + chunk);
+                callback(chunk);
+            });
+        }).on('error', function(e)
+        {
+            console.error("Error while getting resource json: " + e.message);
+            console.error("Terminating");
+            process.exit(1);
+        });
+    }
+
     public handler(url_parts : string, path_name : string, query : any, res : any)
     {
-        function get_resource_json(url : string, callback : (any) => void) : void
-        {
-            var https = require('https');
-            https.get(url, function(res)
-            {
-                console.log("Got response code: " + res.statusCode);
-                res.on("data", function(chunk)
-                {
-                    console.log("Got response: " + chunk);
-                    callback(chunk);
-                });
-            }).on('error', function(e)
-            {
-                console.error("Error while getting resource json: " + e.message);
-                console.error("Terminating");
-                process.exit(1);
-            });
-        }
-
         var _this = this;
         if(path_name === "/assign_resource")
         {
@@ -61,7 +61,7 @@ class ResourceChord extends Chord
         {
             var id = query['id'];
             res.writeHead(200, {'Content-Type': 'application/json'});
-            get_resource_json(_this.resources[id].url, function(json_str)
+            _this.get_resource_json(_this.resources[id].url, function(json_str)
             {
                 res.write(json_str);
                 res.end();

@@ -6,13 +6,17 @@ output/DONT_DELETE:
 	mkdir -p output
 	echo "DONT_DELETE" > output/DONT_DELETE
 
+database/DONT_DELETE:
+	mkdir -p database
+	echo "DONT_DELETE" > database/DONT_DELETE
+
 output/ResourceConfigurator.js: ResourceConfigurator.ts utils.ts
 	tsc ResourceConfigurator.ts -out output/ResourceConfigurator.js
 
 conf_res: output/ResourceConfigurator.js
 	node output/ResourceConfigurator.js
 
-output/Driver.js: Driver.ts Chord.ts ResourceChord.ts FingerChord.ts RenderChord.ts IChord.ts utils.ts ChordHelper.ts output/DONT_DELETE
+output/Driver.js: Driver.ts Chord.ts ResourceLoggerChord.ts ResourceChord.ts FingerChord.ts RenderChord.ts IChord.ts utils.ts ChordHelper.ts output/DONT_DELETE database/DONT_DELETE
 	tsc Driver.ts -out output/Driver.js
 
 build: output/Driver.js

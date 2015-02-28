@@ -2,4 +2,5 @@
 *.swo
 .~
 output/*
+database/*
 Chord.js
