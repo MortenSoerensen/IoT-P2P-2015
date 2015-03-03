@@ -1,13 +1,26 @@
 /// <reference path='Chord.ts'/>
 
-class ResourceChord extends Chord
+class ResourceChord extends FingerChord
 {
     protected resources : any = {};
 
     constructor()
     {
         super();
+        var _this = this;
         console.warn("ResourceChord");
+         // Pre-load the html template
+        var fs = require('fs')
+        fs.readFile('template-resource.html', 'utf8', function (err, data)
+        {
+            if (err)
+            {
+                console.error("Error loading html template: " + err);
+                console.error("Terminating");
+                process.exit(1);
+            }
+            _this.template_string = data;
+        });
     }
 
     protected get_resource_json(url : string, callback : (any) => void) : void

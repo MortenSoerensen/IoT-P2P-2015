@@ -1,0 +1,236 @@
+<html>
+<head>
+    <title>Chord Node</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+    <style>
+        @import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+        html, body {
+            height: 100%;
+        }
+        body {
+            margin: 0px;
+            background: #444;
+            color: #ebebeb;
+            text-align: left;
+            font: 400 200%/1.7 'Open Sans', sans-serif;
+            word-break: break-all;
+        }
+        img {
+            display: block;
+            border: 0px;
+        }
+        a:link, a:visited {
+            color: #222;
+            text-decoration: none;
+        }
+        a:hover, a:active {
+            color: #222;
+        }
+        ::-moz-selection {
+            color: #fff;
+            background: #000;
+        }
+        ::selection {
+            color: #fff;
+            background: #000;
+        }
+        #content {
+            width: 70%;
+            margin: 100px auto 0 auto;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .basics {
+            border: 5px solid white; 
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            overflow: hidden;
+            margin: 0 auto 10px auto;
+        }
+        .node_info {
+            color: #222;
+            width: 20%;
+            height: auto;
+            min-height: 50px;
+            line-height: 50px;
+            display: inline-block;
+            margin: 0 2% 10px 0;
+            vertical-align: top;
+        }
+        .node_info_full {
+            font-weight: normal;
+            width: 65%;
+            margin: 0 0 10px 0;
+            text-align: left;
+        }
+        .node_id {
+            white-space: normal;
+            font-size: 40%;
+            line-height: normal;
+        }
+        .navigation {
+            background: orange;
+            font-weight: 600;
+            font-size: 80%;
+            width: 50%;
+            display: block;
+        }
+        input, button {
+            color: #222;
+            font-size: 100%;
+            display: block;
+            width: 100%;
+            border: 5px solid white; 
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            margin: 0 auto 10px auto;
+        }
+        ::-webkit-input-placeholder {
+            color: #666;
+        }
+        :-moz-placeholder { /* Firefox 18- */
+            color: #666;  
+        }
+        ::-moz-placeholder {  /* Firefox 19+ */
+            color: #666;  
+        }
+        :-ms-input-placeholder {  
+            color: #666;  
+        }
+        button{
+            background: #33cc00;
+        }
+        button:hover{
+            cursor: pointer;
+            color: #fff;
+            background: #33ee00;
+        }
+        .label-link{
+            background: orange;
+        }
+        .label-link:hover {
+            cursor: pointer;
+            color: #fff;
+            background: #ffcc00;
+        }
+        .label {
+            background: #d43c2f;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="content">
+        <div class="basics node_info label">ID</div><div class="basics node_info node_info_full node_id">%%ID%%</div></br>
+        <div class="basics node_info label">IP</div><div class="basics node_info node_info_full">%%IP%%</div></br>
+        <div class="basics node_info label">PORT</div><div class="basics node_info node_info_full">%%PORT%%</div></br>
+        </br>
+        <a href="http://%%SUCC-IP%%:%%SUCC-PORT%%"><div class="basics navigation label-link">VISIT SUCCESSOR</div></a>
+        <a href="http://%%PRED-IP%%:%%PRED-PORT%%"><div class="basics navigation label-link">VISIT PREDECESSOR</div></a>
+        </br>
+        <input id="succ" placeholder="Enter ID"></input>
+        <button onclick="find_succ()">FIND RESPONSIBLE NODE</button>
+        </br>
+        <div id="fingertable">Fingertable: </div>
+        <div id="list_resources">ResourceID: </div>
+
+        <script>
+            $("document").ready( function() {
+                get_fingertable(function(json){
+
+                    for(var i=0;i<=json.length;i++) {
+                    $("#fingertable").append("<a href='http://localhost:" + JSON.stringify(json[i].port) + "'>" + JSON.stringify(json[i].port) + "</a> ");
+                    }
+
+                });
+                list_resources(function(json){
+                    var name = Object.keys(json)[0];
+                    $("#list_resources").append((json[name]) + " " + name);
+                    var id = json[name];
+                    if(json[name] !== null) {
+                        get_resource(id, function(json){
+                            window.alert(id);
+                        });
+                    }
+                });
+                
+            });
+            function find_succ()
+            {
+                var succ = document.getElementById("succ").value;
+                var id = "%%ID%%";
+
+                var succ_pad = Array(id.length + 1 - succ.length).join("0") + succ;
+                //alert(succ);
+                //alert(succ_pad);
+                var xmlhttp = new XMLHttpRequest();
+                var url = "find_successor?id=" + succ_pad;
+                xmlhttp.onreadystatechange = function()
+                {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                    {
+                        //alert(xmlhttp.responseText);
+                        var json = JSON.parse(xmlhttp.responseText);
+                        var goto = "http://" + json.ip + ":" + json.port;
+                        //alert(goto);
+                        window.location.href = goto;
+                    }
+                }
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+            }
+            function get_fingertable(callback)
+            {
+                var xmlhttp = new XMLHttpRequest();
+                var url = "get_fingertable";
+                xmlhttp.onreadystatechange = function()
+                {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                    {
+                        //alert(xmlhttp.responseText);
+                        var json = JSON.parse(xmlhttp.responseText);
+                        callback(json);
+                        
+                    }
+                }
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+            }
+            function list_resources(callback)
+            {
+                var xmlhttp = new XMLHttpRequest();
+                var url = "list_resources";
+                xmlhttp.onreadystatechange = function()
+                {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                    {
+                        //alert(xmlhttp.responseText);
+                        var json = JSON.parse(xmlhttp.responseText);
+                        callback(json);
+                        
+                    }
+                }
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+            }
+            function get_resource(id, callback)
+            {
+                var xmlhttp = new XMLHttpRequest();
+                var url = "get_resource?id="+id;
+                xmlhttp.onreadystatechange = function()
+                {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                    {
+                        //alert(xmlhttp.responseText);
+                        var json = JSON.parse(xmlhttp.responseText);
+                        callback(json);
+                        
+                    }
+                }
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+            }
+        </script>
+    </div>
+</body>
+</html>

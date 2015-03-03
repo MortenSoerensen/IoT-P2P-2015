@@ -42,7 +42,8 @@ module utils
 
         // Do the actual string hashing
         var str_hash = hash_function.update(str).digest('hex');
-        return str_hash;
+
+        return str_hash.substring(0,5);
     }
 
     export function ip_to_string(ip : string) : string
