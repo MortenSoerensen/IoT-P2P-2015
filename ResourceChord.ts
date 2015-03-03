@@ -73,16 +73,26 @@ class ResourceChord extends FingerChord
         else if(path_name === "/get_resource")
         {
             var id = query['id'];
+            if (id === null || id === undefined)
+            {
+            	res.writeHead(400, {'Content-Type': 'text/plain'});
+	            res.write("Resource id not set!");
+	            res.end();
+	            return;
+            }
+            if (_this.resources[id] === null || _this.resources[id] === undefined)
+            {
+            	res.writeHead(400, {'Content-Type': 'text/plain'});
+	            res.write("Resource id does not exist!");
+	            res.end();
+	            return;	
+            }
             res.writeHead(200, {'Content-Type': 'application/json'});
             _this.get_resource_json(_this.resources[id].url, function(json_str)
             {
                 res.write(json_str);
                 res.end();
-            });
-            /*
-            res.write(JSON.stringify(_this.resources[id]));
-            res.end();
-            */
+            });            
         }
         else
         {

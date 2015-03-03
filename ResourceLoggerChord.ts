@@ -16,6 +16,19 @@ class ResourceLoggerChord extends ResourceChord
         {
             _this.pull_data();
         }, 5000);
+
+	// Pre-load the html template
+        var fs = require('fs')
+        fs.readFile('template-logger.html', 'utf8', function (err, data)
+        {
+            if (err)
+            {
+                console.error("Error loading html template: " + err);
+                console.error("Terminating");
+                process.exit(1);
+            }
+            _this.template_string = data;
+        });
     }
 
     private pull_data() : void
