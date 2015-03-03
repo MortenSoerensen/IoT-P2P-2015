@@ -37,13 +37,25 @@ if(nodes >= 1)
         }
     });
 }
+
+function all_spawned()
+{
+    var node = spawn('node', ['output/ResourceConfigurator.js']);
+    // Print out any errors detected
+    node.stderr.on('data', function(data) {
+        console.error(data.toString());
+    });
+
+    console.log("All nodes spawned!");
+}
+
 // Recursive spawner function
 var start = function recurse(i)
 {
     // Check if all nodes have been created
     if(i >= nodes - 1)
     {
-        console.info("All nodes spawned!");
+        all_spawned();
         return;
     }
     // Spawn a node

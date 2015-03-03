@@ -13,10 +13,7 @@ database/DONT_DELETE:
 output/ResourceConfigurator.js: ResourceConfigurator.ts utils.ts
 	tsc ResourceConfigurator.ts -out output/ResourceConfigurator.js
 
-conf_res: output/ResourceConfigurator.js
-	node output/ResourceConfigurator.js
-
-output/Driver.js: Driver.ts Chord.ts ResourceLoggerChord.ts ResourceChord.ts FingerChord.ts RenderChord.ts IChord.ts utils.ts ChordHelper.ts output/DONT_DELETE database/DONT_DELETE
+output/Driver.js: Driver.ts Chord.ts ResourceLoggerChord.ts ResourceChord.ts FingerChord.ts RenderChord.ts IChord.ts utils.ts ChordHelper.ts output/ResourceConfigurator.js output/DONT_DELETE database/DONT_DELETE
 	tsc Driver.ts -out output/Driver.js
 
 build: output/Driver.js

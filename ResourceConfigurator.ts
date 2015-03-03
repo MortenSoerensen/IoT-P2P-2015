@@ -25,11 +25,21 @@ function assign_resource(json : Object, port : number, callback : () => void) : 
     http.get(options, function(res)
     {
         console.log("Got response code: " + res.statusCode);
-        res.on("data", function(chunk)
+        if(res.statusCode === 404)
         {
-            console.log("Got response: " + chunk);
-            callback();
-        });
+            console.error("Unable to assign resource");
+            console.error("Are you using ResourceChord nodes?");
+            console.error("Terminating");
+            process.exit(1);
+        }
+        else
+        {
+            res.on("data", function(chunk)
+            {
+                console.log("Got response: " + chunk);
+                callback();
+            });
+        }
     }).on('error', function(e)
     {
         console.error("Error while assigning resource: " + e.message);
@@ -42,6 +52,7 @@ ChordHelper.find_successor(resource_id, 8080, function(suc)
 {
     assign_resource(resource_json, suc.port, function()
     {
-        console.info("Resource assigned");
+        console.warn("Resource assigned");
+        console.warn("id = " + resource_id);
     });
 });
