@@ -4,3 +4,4 @@
 output/*
 database/*
 Chord.js
+node_modules/*
