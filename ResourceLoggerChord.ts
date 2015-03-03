@@ -58,6 +58,19 @@ class ResourceLoggerChord extends ResourceChord
 
     public handler(url_parts : string, path_name : string, query : any, res : any)
     {
+		// Pre-load the html template
+        var fs = require('fs')
+        fs.readFile('template-logger.html', 'utf8', function (err, data)
+        {
+            if (err)
+            {
+                console.error("Error loading html template: " + err);
+                console.error("Terminating");
+                process.exit(1);
+            }
+            _this.template_string = data;
+        });
+
         var _this = this;
         if(path_name === "/assign_resource")
         {
