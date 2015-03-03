@@ -22,7 +22,7 @@ clean:
 	rm -rf output
 
 run: output/Driver.js
-	node output/Driver.js main_node
+	node ChordSpawner.js 1
 
 spawn: output/Driver.js
 	node ChordSpawner.js 10
