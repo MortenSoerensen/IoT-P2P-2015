@@ -25,7 +25,7 @@ run: output/Driver.js
 	node ChordSpawner.js 1
 
 spawn: output/Driver.js
-	node ChordSpawner.js 10
+	node ChordSpawner.js 20
 
 render:
 	mkdir -p output

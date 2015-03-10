@@ -20,11 +20,11 @@
             border: 0px;
         }
         a:link, a:visited {
-            color: #222;
+            color: #1CF;
             text-decoration: none;
         }
         a:hover, a:active {
-            color: #222;
+            color: #10E;
         }
         ::-moz-selection {
             color: #fff;
@@ -62,12 +62,7 @@
             width: 65%;
             margin: 0 0 10px 0;
             text-align: left;
-        }
-        .node_id {
-            white-space: normal;
-            font-size: 40%;
-            line-height: normal;
-        }
+        }        
         .navigation {
             background: orange;
             font-weight: 600;
@@ -116,30 +111,28 @@
         .label {
             background: #d43c2f;
         }
-        .resources {
+        .prettyTable {
             margin: 20px auto 20px auto;
             width: 70%;
             border-collapse: collapse;
         } 
-        .resources th {
+        .prettyTable th {
             font-size: 1.3em;
             background: #33cc00;
             color: black;
         }
-        .resources td {
+        .prettyTable td {
             background: #222;
         }
-        .resources th, .resources td{
+        .prettyTable th, .prettyTable td{
             padding: 5px;
             border: 5px solid white;
             text-align: left;
         }
-        .resources tr.alt td {
+        .prettyTable tr.alt td {
             color: #000000;
             background-color: #EAF2D3;
         }
-
-
     </style>
 </head>
 <body>
@@ -154,42 +147,30 @@
         <input id="succ" placeholder="Enter ID"></input>
         <button onclick="find_succ()">FIND RESPONSIBLE NODE</button>
         </br>
-        <div id="fingertable">Fingertable: </div>
-        <div id="list_resources">Resources: </div>
+        <div id="fingertable">Fingertable </div>
+        <div id="list_resources">Resources </div>
 
         <script>
             $("document").ready( function() {
                 get_fingertable(function(json){
-
+                    $("#fingertable").append('<table id="table_fingers" class="prettyTable"><tr><th>ID</th><th>IP</th><th>Port</th></tr></table>');
+                    
                     for(var i=0;i<json.length;i++) {
-                        $("#fingertable").append("<a href='http://localhost:" + JSON.stringify(json[i].port) + "'>" + JSON.stringify(json[i].port) + "</a> ");
+                        $("#table_fingers").append('<tr><td><a href="http://'+json[i].ip+':'+json[i].port+'">'+json[i].id+'</a></td>'+
+                            '<td>'+json[i].ip+'</td><td>'+json[i].port+'</td></tr>');
                     }
-
                 });
                 list_resources(function(json){
-                    $("#list_resources").append('<table class="resources"><tr><th>Name</th><th>ID</th><th>Temperature</th></tr></table>');
+                    $("#list_resources").append('<table id="table_resources" class="prettyTable"><tr><th>Name</th><th>ID</th><th>Temperature</th></tr></table>');
 
                     Object.keys(json).forEach(function (key) {
                         get_resource(json[key], function(new_json){
                             console.log(JSON.stringify(new_json));
                             var result = new_json.result;
                             console.log(JSON.stringify(json));
-                            $(".resources").append('<tr><td>'+key+'</td><td>'+json[key]+'</td><td>'+result+'</td></tr>');
+                            $("#table_resources").append('<tr><td>'+key+'</td><td>'+json[key]+'</td><td>'+result+'</td></tr>');
                         });
                     })
-
-                    /*
-                    var name = Object.keys(json)[0];
-                    $("#list_resources").append((json[name]) + " " + name);
-                    
-                    var id = json[name];
-                    get_resource(id, function(json){
-                        console.log(JSON.stringify(json));
-
-                        $("#list_resource").append("<table><tr></tr>);
-
-
-                    });*/
                 });                
             });
             function find_succ()

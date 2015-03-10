@@ -4,119 +4,136 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <style>
-    @import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
-		html, body {
-		    height: 100%;
-		}
-		body {
-		    margin: 0px;
-		    background: #444;
-		    color: #ebebeb;
-		    text-align: left;
-		    font: 400 200%/1.7 'Open Sans', sans-serif;
-		    word-break: break-all;
-		}
-		img {
-		    display: block;
-		    border: 0px;
-		}
-		a:link, a:visited {
-		    color: #222;
-		    text-decoration: none;
-		}
-		a:hover, a:active {
-		    color: #222;
-		}
-		::-moz-selection {
-		    color: #fff;
-		    background: #000;
-		}
-		::selection {
-		    color: #fff;
-		    background: #000;
-		}
-#content {
-    width: 70%;
-    margin: 100px auto 0 auto;
-    text-align: center;
-    white-space: nowrap;
-}
-		.basics {
-		    border: 5px solid white; 
-		    padding: 15px;
-		    background: rgba(255,255,255,0.5);
-		    overflow: hidden;
-		    margin: 0 auto 10px auto;
-		}
-		.node_info {
-		    color: #222;
-		    width: 20%;
-		    height: auto;
-		    min-height: 50px;
-		    line-height: 50px;
-		    display: inline-block;
-		    margin: 0 2% 10px 0;
-		    vertical-align: top;
-		}
-		.node_info_full {
-		    font-weight: normal;
-		    width: 65%;
-		    margin: 0 0 10px 0;
-		    text-align: left;
-		}
-		.node_id {
-		    white-space: normal;
-		    font-size: 40%;
-		    line-height: normal;
-		}
-		.navigation {
-		    background: orange;
-		    font-weight: 600;
-		    font-size: 80%;
-		    width: 50%;
-		    display: block;
-		}
-		input, button {
-		    color: #222;
-		    font-size: 100%;
-		    display: block;
-		    width: 100%;
-		    border: 5px solid white; 
-		    padding: 15px;
-		    background: rgba(255,255,255,0.5);
-		    margin: 0 auto 10px auto;
-		}
-		::-webkit-input-placeholder {
-		    color: #666;
-		}
-		:-moz-placeholder { /* Firefox 18- */
-		    color: #666;  
-		}
-		::-moz-placeholder {  /* Firefox 19+ */
-		    color: #666;  
-		}
-		:-ms-input-placeholder {  
-		    color: #666;  
-		}
-		button{
-		    background: #33cc00;
-		}
-		button:hover{
-		    cursor: pointer;
-		    color: #fff;
-		    background: #33ee00;
-		}
-		.label-link{
-		    background: orange;
-		}
-		.label-link:hover {
-		    cursor: pointer;
-		    color: #fff;
-		    background: #ffcc00;
-		}
-		.label {
-		    background: #d43c2f;
-		}
+    	@import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+        html, body {
+            height: 100%;
+        }
+        body {
+            margin: 0px;
+            background: #444;
+            color: #ebebeb;
+            text-align: left;
+            font: 400 200%/1.7 'Open Sans', sans-serif;
+            word-break: break-all;
+        }
+        img {
+            display: block;
+            border: 0px;
+        }
+        a:link, a:visited {
+            color: #1CF;
+            text-decoration: none;
+        }
+        a:hover, a:active {
+            color: #10E;
+        }
+        ::-moz-selection {
+            color: #fff;
+            background: #000;
+        }
+        ::selection {
+            color: #fff;
+            background: #000;
+        }
+        #content {
+            width: 70%;
+            margin: 100px auto 0 auto;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .basics {
+            border: 5px solid white; 
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            overflow: hidden;
+            margin: 0 auto 10px auto;
+        }
+        .node_info {
+            color: #222;
+            width: 20%;
+            height: auto;
+            min-height: 50px;
+            line-height: 50px;
+            display: inline-block;
+            margin: 0 2% 10px 0;
+            vertical-align: top;
+        }
+        .node_info_full {
+            font-weight: normal;
+            width: 65%;
+            margin: 0 0 10px 0;
+            text-align: left;
+        }        
+        .navigation {
+            background: orange;
+            font-weight: 600;
+            font-size: 80%;
+            width: 50%;
+            display: block;
+        }
+        input, button {
+            color: #222;
+            font-size: 100%;
+            display: block;
+            width: 100%;
+            border: 5px solid white; 
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            margin: 0 auto 10px auto;
+        }
+        ::-webkit-input-placeholder {
+            color: #666;
+        }
+        :-moz-placeholder { /* Firefox 18- */
+            color: #666;  
+        }
+        ::-moz-placeholder {  /* Firefox 19+ */
+            color: #666;  
+        }
+        :-ms-input-placeholder {  
+            color: #666;  
+        }
+        button{
+            background: #33cc00;
+        }
+        button:hover{
+            cursor: pointer;
+            color: #fff;
+            background: #33ee00;
+        }
+        .label-link{
+            background: orange;
+        }
+        .label-link:hover {
+            cursor: pointer;
+            color: #fff;
+            background: #ffcc00;
+        }
+        .label {
+            background: #d43c2f;
+        }
+        .prettyTable {
+            margin: 20px auto 20px auto;
+            width: 70%;
+            border-collapse: collapse;
+        } 
+        .prettyTable th {
+            font-size: 1.3em;
+            background: #33cc00;
+            color: black;
+        }
+        .prettyTable td {
+            background: #222;
+        }
+        .prettyTable th, .prettyTable td{
+            padding: 5px;
+            border: 5px solid white;
+            text-align: left;
+        }
+        .prettyTable tr.alt td {
+            color: #000000;
+            background-color: #EAF2D3;
+        }
 
 		</style>
 		</head>
@@ -132,8 +149,30 @@
 		<input id="succ" placeholder="Enter ID"></input>
 		<button onclick="find_succ()">FIND RESPONSIBLE NODE</button>
 		</br>
-		<div id="fingertable">Fingertable: </div>
+		<div id="fingertable">Fingertable </div>
+        <div id="list_resources">Resources </div>
 		<script>
+			get_fingertable(function(json){
+                $("#fingertable").append('<table id="table_fingers" class="prettyTable"><tr><th>ID</th><th>IP</th><th>Port</th></tr></table>');
+                
+                for(var i=0;i<json.length;i++) {
+                    $("#table_fingers").append('<tr><td><a href="http://'+json[i].ip+':'+json[i].port+'">'+json[i].id+'</a></td>'+
+                        '<td>'+json[i].ip+'</td><td>'+json[i].port+'</td></tr>');
+                }
+            });
+            list_resources(function(json){
+                $("#list_resources").append('<table id="table_resources" class="prettyTable"><tr><th>Name</th><th>ID</th><th>Temperature</th></tr></table>');
+
+                Object.keys(json).forEach(function (key) {
+                    get_resource(json[key], function(new_json){
+                        console.log(JSON.stringify(new_json));
+                        var result = new_json.result;
+                        console.log(JSON.stringify(json));
+                        $("#table_resources").append('<tr><td>'+key+'</td><td>'+json[key]+'</td><td>'+result+'</td></tr>');
+                    });
+                })
+            });
+		
 		var get_dump = function (callback) {
 		    
 		    var xmlhttp = new XMLHttpRequest();

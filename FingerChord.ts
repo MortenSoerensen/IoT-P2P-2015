@@ -2,7 +2,7 @@
 
 class FingerChord extends Chord
 {
-    static fingertableSize : number = 3;
+    static fingertableSize : number = 20;
     static fingertableSpan : number = Math.pow(2, (FingerChord.fingertableSize));
     private fingertable : Array<NodeInfo>;
 
