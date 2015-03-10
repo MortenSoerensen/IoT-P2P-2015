@@ -39,5 +39,5 @@ else // Enough arguments
     }
 }
 
-var n : IChord = new RenderChord<ResourceChord>(new ResourceChord());
+var n : IChord = new RenderChord<ResourceChord>(new ResourceLoggerChord());
 n.run(port);

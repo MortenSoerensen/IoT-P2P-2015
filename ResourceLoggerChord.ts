@@ -81,6 +81,20 @@ class ResourceLoggerChord extends ResourceChord
         {
             var id = query['id'];
             res.writeHead(200, {'Content-Type': 'application/json'});
+	    if (id === null || id === undefined)
+            {
+            	res.writeHead(400, {'Content-Type': 'text/plain'});
+	            res.write("Resource id not set!");
+	            res.end();
+	            return;
+            }
+            if (_this.resources[id] === null || _this.resources[id] === undefined)
+            {
+            	res.writeHead(400, {'Content-Type': 'text/plain'});
+	            res.write("Resource id does not exist!");
+	            res.end();
+	            return;	
+            }
 
             var val = _this.resources[id];
             var collection = _this.db.collection(val.hash + "_" + _this.info.port);

@@ -1,144 +1,171 @@
-    <html>
-    <head>
-    <title>Chord Logger Node</title>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <style>
-    	@import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
-        html, body {
-            height: 100%;
-        }
-        body {
-            margin: 0px;
-            background: #444;
-            color: #ebebeb;
-            text-align: left;
-            font: 400 200%/1.7 'Open Sans', sans-serif;
-            word-break: break-all;
-        }
-        img {
-            display: block;
-            border: 0px;
-        }
-        a:link, a:visited {
-            color: #1CF;
-            text-decoration: none;
-        }
-        a:hover, a:active {
-            color: #10E;
-        }
-        ::-moz-selection {
-            color: #fff;
-            background: #000;
-        }
-        ::selection {
-            color: #fff;
-            background: #000;
-        }
-        #content {
-            width: 70%;
-            margin: 100px auto 0 auto;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .basics {
-            border: 5px solid white; 
-            padding: 15px;
-            background: rgba(255,255,255,0.5);
-            overflow: hidden;
-            margin: 0 auto 10px auto;
-        }
-        .node_info {
-            color: #222;
-            width: 20%;
-            height: auto;
-            min-height: 50px;
-            line-height: 50px;
-            display: inline-block;
-            margin: 0 2% 10px 0;
-            vertical-align: top;
-        }
-        .node_info_full {
-            font-weight: normal;
-            width: 65%;
-            margin: 0 0 10px 0;
-            text-align: left;
-        }        
-        .navigation {
-            background: orange;
-            font-weight: 600;
-            font-size: 80%;
-            width: 50%;
-            display: block;
-        }
-        input, button {
-            color: #222;
-            font-size: 100%;
-            display: block;
-            width: 100%;
-            border: 5px solid white; 
-            padding: 15px;
-            background: rgba(255,255,255,0.5);
-            margin: 0 auto 10px auto;
-        }
-        ::-webkit-input-placeholder {
-            color: #666;
-        }
-        :-moz-placeholder { /* Firefox 18- */
-            color: #666;  
-        }
-        ::-moz-placeholder {  /* Firefox 19+ */
-            color: #666;  
-        }
-        :-ms-input-placeholder {  
-            color: #666;  
-        }
-        button{
-            background: #33cc00;
-        }
-        button:hover{
-            cursor: pointer;
-            color: #fff;
-            background: #33ee00;
-        }
-        .label-link{
-            background: orange;
-        }
-        .label-link:hover {
-            cursor: pointer;
-            color: #fff;
-            background: #ffcc00;
-        }
-        .label {
-            background: #d43c2f;
-        }
-        .prettyTable {
-            margin: 20px auto 20px auto;
-            width: 70%;
-            border-collapse: collapse;
-        } 
-        .prettyTable th {
-            font-size: 1.3em;
-            background: #33cc00;
-            color: black;
-        }
-        .prettyTable td {
-            background: #222;
-        }
-        .prettyTable th, .prettyTable td{
-            padding: 5px;
-            border: 5px solid white;
-            text-align: left;
-        }
-        .prettyTable tr.alt td {
-            color: #000000;
-            background-color: #EAF2D3;
-        }
+<html>
+	<head>
+		<title>Chord Logger Node</title>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<style>
+			@import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+		    html, body {
+		        height: 100%;
+		    }
+		    body {
+		        margin: 0px;
+		        background: #444;
+		        color: #ebebeb;
+		        text-align: left;
+		        font: 400 200%/1.7 'Open Sans', sans-serif;
+		        word-break: break-all;
+		    }
+		    img {
+		        display: block;
+		        border: 0px;
+		    }
+		    a:link, a:visited {
+		        color: #1CF;
+		        text-decoration: none;
+		    }
+		    a:hover, a:active {
+		        color: #10E;
+		    }
+		    ::-moz-selection {
+		        color: #fff;
+		        background: #000;
+		    }
+		    ::selection {
+		        color: #fff;
+		        background: #000;
+		    }
+		    #content {
+		        width: 70%;
+		        margin: 100px auto 0 auto;
+		        text-align: center;
+		        white-space: nowrap;
+		    }
+		    .basics {
+		        border: 5px solid white; 
+		        padding: 15px;
+		        background: rgba(255,255,255,0.5);
+		        overflow: hidden;
+		        margin: 0 auto 10px auto;
+		    }
+		    .node_info {
+		        color: #222;
+		        width: 20%;
+		        height: auto;
+		        min-height: 50px;
+		        line-height: 50px;
+		        display: inline-block;
+		        margin: 0 2% 10px 0;
+		        vertical-align: top;
+		    }
+		    .node_info_full {
+		        font-weight: normal;
+		        width: 65%;
+		        margin: 0 0 10px 0;
+		        text-align: left;
+		    }        
+		    .navigation {
+		        background: orange;
+		        font-weight: 600;
+		        font-size: 80%;
+		        width: 50%;
+		        display: block;
+		    }
+		    input, button {
+		        color: #222;
+		        font-size: 100%;
+		        display: block;
+		        width: 100%;
+		        border: 5px solid white; 
+		        padding: 15px;
+		        background: rgba(255,255,255,0.5);
+		        margin: 0 auto 10px auto;
+		    }
+		    ::-webkit-input-placeholder {
+		        color: #666;
+		    }
+		    :-moz-placeholder { /* Firefox 18- */
+		        color: #666;  
+		    }
+		    ::-moz-placeholder {  /* Firefox 19+ */
+		        color: #666;  
+		    }
+		    :-ms-input-placeholder {  
+		        color: #666;  
+		    }
+		    button{
+		        background: #33cc00;
+		    }
+		    button:hover{
+		        cursor: pointer;
+		        color: #fff;
+		        background: #33ee00;
+		    }
+		    .label-link{
+		        background: orange;
+		    }
+		    .label-link:hover {
+		        cursor: pointer;
+		        color: #fff;
+		        background: #ffcc00;
+		    }
+		    .label {
+		        background: #d43c2f;
+		    }
+		    .prettyTable {
+		        margin: 20px auto 20px auto;
+		        width: 70%;
+		        border-collapse: collapse;
+		    } 
+		    .prettyTable th {
+		        font-size: 1.3em;
+		        background: #33cc00;
+		        color: black;
+		    }
+		    .prettyTable td {
+		        background: #222;
+		    }
+		    .prettyTable th, .prettyTable td{
+		        padding: 5px;
+		        border: 5px solid white;
+		        text-align: left;
+		    }
+		    .prettyTable tr.alt td {
+		        color: #000000;
+		        background-color: #EAF2D3;
+		    }
+		    /* Visualization styles */
+		    /* tell the SVG path to be a thin blue line without any area fill */
+			path {
+			    stroke: steelblue;
+			    stroke-width: 1;
+			    fill: none;
+			}
+			
+			.axis {
+			    shape-rendering: crispEdges;
+			}
 
+			.x.axis line {
+			    stroke: lightgrey;
+			}
+
+			.x.axis .minor {
+			    stroke-opacity: .5;
+			}
+
+			.x.axis path {
+			    display: none;
+			}
+
+			.y.axis line, .y.axis path {
+			    fill: none;
+			    stroke: #000;
+			}
 		</style>
-		</head>
-		<body>
-		<div id="content">
+	</head>
+	<body>
+	<div id="content">
 		<div class="basics node_info label">ID</div><div class="basics node_info node_info_full node_id">%%ID%%</div></br>
 		<div class="basics node_info label">IP</div><div class="basics node_info node_info_full">%%IP%%</div></br>
 		<div class="basics node_info label">PORT</div><div class="basics node_info node_info_full">%%PORT%%</div></br>
@@ -150,142 +177,161 @@
 		<button onclick="find_succ()">FIND RESPONSIBLE NODE</button>
 		</br>
 		<div id="fingertable">Fingertable </div>
-        <div id="list_resources">Resources </div>
+	    <div id="list_resources">Resources </div>
+	    <div id="graph" class="aGraph"></div>
 		<script>
 			get_fingertable(function(json){
-                $("#fingertable").append('<table id="table_fingers" class="prettyTable"><tr><th>ID</th><th>IP</th><th>Port</th></tr></table>');
-                
-                for(var i=0;i<json.length;i++) {
-                    $("#table_fingers").append('<tr><td><a href="http://'+json[i].ip+':'+json[i].port+'">'+json[i].id+'</a></td>'+
-                        '<td>'+json[i].ip+'</td><td>'+json[i].port+'</td></tr>');
-                }
-            });
-            list_resources(function(json){
-                $("#list_resources").append('<table id="table_resources" class="prettyTable"><tr><th>Name</th><th>ID</th><th>Temperature</th></tr></table>');
+	            $("#fingertable").append('<table id="table_fingers" class="prettyTable"><tr><th>ID</th><th>IP</th><th>Port</th></tr></table>');
+	            
+	            for(var i=0;i<json.length;i++) {
+	                $("#table_fingers").append('<tr><td><a href="http://'+json[i].ip+':'+json[i].port+'">'+json[i].id+'</a></td>'+
+	                    '<td>'+json[i].ip+'</td><td>'+json[i].port+'</td></tr>');
+	            }
+	        });
+	        list_resources(function(json){
+	            $("#list_resources").append('<table id="table_resources" class="prettyTable"><tr><th>Name</th><th>ID</th><th>Temperature</th></tr></table>');
 
-                Object.keys(json).forEach(function (key) {
-                    get_resource(json[key], function(new_json){
-                        console.log(JSON.stringify(new_json));
-                        var result = new_json.result;
-                        console.log(JSON.stringify(json));
-                        $("#table_resources").append('<tr><td>'+key+'</td><td>'+json[key]+'</td><td>'+result+'</td></tr>');
-                    });
-                })
-            });
+	            Object.keys(json).forEach(function (key) {
+	                get_resource(json[key], function(new_json){
+	                    console.log(JSON.stringify(new_json));
+	                    var result = new_json.result;
+	                    console.log(JSON.stringify(json));
+	                    $("#table_resources").append('<tr><td>'+key+'</td><td>'+json[key]+'</td><td>'+result+'</td></tr>');
+	                });
+	            })
+	        });
 		
-		var get_dump = function (callback) {
-		    
-		    var xmlhttp = new XMLHttpRequest();
-		    var url = "get_resource_dump?id=8672b";
-		    xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			    //alert(xmlhttp.responseText);
-			    var json = JSON.parse(xmlhttp.responseText);
-			    callback(json);
-			}
-		    }
-		    xmlhttp.open("GET", url, true);
-		    xmlhttp.send();
-		}
-
-		var add_visuals = function (data) {
-		    var canvas = d3.select("body").append("svg")
-			.attr("width", 500)
-			.attr("height", 500)
-			.attr("border", "black")
-
-		    var group = canvas.append("g")
-			.attr("transform", "translate(100,10)")
-
-		    var line = d3.svg.line()
-			.x(function(d, i) {
-			    return d.x;
-			})
-			.y(function(d, i) {
-			    return d.y;
-			}); 
-
-		    group.selectAll("path")
-			.data(data).enter()
-			.append("path")
-			.attr("d", function(d){ return line(d) })
-			.attr("fill", "none")
-			.attr("stroke", "green")
-			.attr("stroke-width", 3);
-		}
-
-
-
-
-		$("document").ready( function() {
-		    d3.selectAll("#visuals").style("background-color", "white");
-		    get_dump(function(data) {
-//			var trimdata = data.map(function (cur) {
-			    //return {x: cur["coreInfo"]["last_heard"], y: cur["result"]};
-			//			});
-			var trimdata = [ [-1, -3], [2, 4], [3, -4], [-3, 1]];
-			add_visuals(trimdata);
-		    });
-
-		    
-
-				     
-
-		    
-
-		
-		    
-
-		    get_fingertable(function(json) {
-
-				 for(var i=0;i<=json.length;i++) {
-				     $("#fingertable").append("<a href='http://localhost:" + JSON.stringify(json[i].port) + "'>" + JSON.stringify(json[i].port) + "</a> ");
-				 }
-
-			     });
+			// create a simple data array that we'll plot with a line (this array represents only the Y values, X will just be the index location)
+			get_dump(function(data) {
+			    var temp = data.map(function (cur) {
+				return cur["result"];
 			    });
-				     function find_succ()
-				     {
-					 var succ = document.getElementById("succ").value;
-					 var id = "%%ID%%";
+			    var sliced_temp = temp.slice(Math.max(temp.length - 100, 1));
+			    draw_diagram(sliced_temp);
+			});
 
-					 var succ_pad = Array(id.length + 1 - succ.length).join("0") + succ;
-					 //alert(succ);
-					 //alert(succ_pad);
-					 var xmlhttp = new XMLHttpRequest();
-					 var url = "find_successor?id=" + succ_pad;
-					 xmlhttp.onreadystatechange = function()
-					 {
-					     if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
-					     {
-						 //alert(xmlhttp.responseText);
-						 var json = JSON.parse(xmlhttp.responseText);
-						 var goto = "http://" + json.ip + ":" + json.port;
-						 //alert(goto);
-						 window.location.href = goto;
-					     }
-					 }
-					 xmlhttp.open("GET", url, true);
-					 xmlhttp.send();
-				     }
-				     function get_fingertable(callback)
-				     {
-					 var xmlhttp = new XMLHttpRequest();
-					 var url = "get_fingertable";
-					 xmlhttp.onreadystatechange = function()
-					 {
-					     if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
-					     {
-						 //alert(xmlhttp.responseText);
-						 var json = JSON.parse(xmlhttp.responseText);
-						 callback(json);
-						 
-					     }
-					 }
-					 xmlhttp.open("GET", url, true);
-					 xmlhttp.send();
-				     }
-				     </script>
-				     </div>
-				     </body>
-				     </html>
+			function draw_diagram (data) {
+			    var m = [80, 80, 80, 80]; // margins
+			    var w = 1000 - m[1] - m[3]; // width
+			    var h = 400 - m[0] - m[2]; // height
+			    
+			    // X scale will fit all values from data[] within pixels 0-w
+			    var x = d3.scale.linear().domain([0, data.length]).range([0, w]);
+			    // Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
+			    var y = d3.scale.linear().domain([0, 30]).range([h, 0]);
+			    // automatically determining max range can work something like this
+			    // var y = d3.scale.linear().domain([0, d3.max(data)]).range([h, 0]);
+
+			    // create a line function that can convert data[] into x and y points
+			    var line = d3.svg.line()
+			    // assign the X function to plot our line as we wish
+				.x(function(d,i) { 
+				    // verbose logging to show what's actually being done
+				    console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+				    // return the X coordinate where we want to plot this datapoint
+				    return x(i); 
+				})
+				.y(function(d) { 
+				    // verbose logging to show what's actually being done
+				    console.log('Plotting Y value for data point: ' + d + ' to be at: ' + y(d) + " using our yScale.");
+				    // return the Y coordinate where we want to plot this datapoint
+				    return y(d); 
+				})
+
+			    // Add an SVG element with the desired dimensions and margin.
+			    var graph = d3.select("#graph").append("svg:svg")
+				.attr("width", w + m[1] + m[3])
+				.attr("height", h + m[0] + m[2])
+				.append("svg:g")
+				.attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+			    // create yAxis
+			    var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
+			    // Add the x-axis.
+			    graph.append("svg:g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + h + ")")
+				.call(xAxis);
+
+
+			    // create left yAxis
+			    var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
+			    // Add the y-axis to the left
+			    graph.append("svg:g")
+				.attr("class", "y axis")
+				.attr("transform", "translate(-25,0)")
+				.call(yAxisLeft);
+			    
+				// Add the line by appending an svg:path element with the data line we created above
+			    // do this AFTER the axes above so that the line is above the tick-lines
+				graph.append("svg:path").attr("d", line(data));
+			}
+			
+			function get_dump (callback) {
+			    var xmlhttp = new XMLHttpRequest();
+			    var url = "get_resource_dump?id=8672b";
+			    xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				    var json = JSON.parse(xmlhttp.responseText);
+				    callback(json);
+				}
+			    }
+			    xmlhttp.open("GET", url, true);
+			    xmlhttp.send();
+			}
+
+			$("document").ready(function() {
+
+			    get_fingertable(function(json) {
+
+				for(var i=0;i<=json.length;i++) {
+				    $("#fingertable").append("<a href='http://localhost:" + JSON.stringify(json[i].port) + "'>" + JSON.stringify(json[i].port) + "</a> ");
+				}
+
+			    });
+			});
+			function find_succ()
+			{
+			    var succ = document.getElementById("succ").value;
+			    var id = "%%ID%%";
+
+			    var succ_pad = Array(id.length + 1 - succ.length).join("0") + succ;
+			    //alert(succ);
+			    //alert(succ_pad);
+			    var xmlhttp = new XMLHttpRequest();
+			    var url = "find_successor?id=" + succ_pad;
+			    xmlhttp.onreadystatechange = function()
+			    {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+				{
+				    //alert(xmlhttp.responseText);
+				    var json = JSON.parse(xmlhttp.responseText);
+				    var goto = "http://" + json.ip + ":" + json.port;
+				    //alert(goto);
+				    window.location.href = goto;
+				}
+			    }
+			    xmlhttp.open("GET", url, true);
+			    xmlhttp.send();
+			}
+			function get_fingertable(callback)
+			{
+			    var xmlhttp = new XMLHttpRequest();
+			    var url = "get_fingertable";
+			    xmlhttp.onreadystatechange = function()
+			    {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+				{
+				    //alert(xmlhttp.responseText);
+				    var json = JSON.parse(xmlhttp.responseText);
+				    callback(json);
+				    
+				}
+			    }
+			    xmlhttp.open("GET", url, true);
+			    xmlhttp.send();
+			}
+		</script>
+	</div>
+	</body>
+</html>
